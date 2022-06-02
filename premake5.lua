@@ -1,10 +1,10 @@
 include "Dependencies/premake/Custom/solutionitems.lua"
 
-workspace "__WORKSPACE_NAME__"
+workspace "Visualizer4D"
 	architecture "x86_64"
-	startproject "__PROJECT_NAME__"
+	startproject "Visualizer4D"
 
-	configurations { "Debug", "Release", "Dist" }
+	configurations { "Profile", "Debug", "Release", "Dist" }
 
 	solutionitems {
 		-- Visual Studio
@@ -36,5 +36,13 @@ OutputDir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 include "Dependencies/premake/Custom/usestdpreproc.lua"
 include "Dependencies/Dependencies.lua"
 
+group "Dependencies/Engine"
+	include "Engine/Dependencies/glfw-3.3.7"
+	include "Engine/Dependencies/stb-2.27"
+group "Dependencies/Visualizer4D"
+
+group ""
+
 -- Add any projects here with 'include "__PROJECT_NAME__"'
-include "__PROJECT_NAME__"
+include "Engine"
+include "Visualizer4D"
