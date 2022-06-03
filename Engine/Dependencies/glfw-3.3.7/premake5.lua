@@ -39,10 +39,15 @@ project "glfw"
 			"_CRT_SECURE_NO_WARNINGS"
 		}
 
-	filter "configurations:Debug"
+	filter "configurations:Profile"
 		runtime "Debug"
 		optimize "Off"
 		symbols "On"
+
+	filter "configurations:Debug"
+		runtime "Debug"
+		optimize "Debug"
+		symbols "Full"
 
 	filter "configurations:Release"
 		runtime "Release"
@@ -51,5 +56,5 @@ project "glfw"
 
 	filter "configurations:Dist"
 		runtime "Release"
-		optimize "On"
+		optimize "Full"
 		symbols "Off"

@@ -1,19 +1,25 @@
 #pragma once
 
-#if PLATFORM_WINDOWS
+#if SYSTEM_WINDOWS
 
 #include "Engine/Core/Application.h"
 #include "Engine/Core/Logger.h"
 #include "Engine/Debug/Profiler.h"
 
 extern eng::Application* CreateApplication(eng::CommandLineArgs args);
+
 bool g_RestartApplication = true;
+eng::RendererAPI::API g_NextRendererAPI = eng::RendererAPI::API::None;
 
 namespace eng
 {
 	int Main(CommandLineArgs args)
 	{
 		Logger::Init();
+
+		// TODO: change this.
+		bool initialSettingRendererAPIStatus = RendererAPI::SetAPI(RendererAPI::API::OpenGL);
+		CORE_ASSERT(initialSettingRendererAPIStatus, "Failed to set initial Renderer API!");
 
 		do
 		{
@@ -28,6 +34,14 @@ namespace eng
 			PROFILE_BEGIN_RUNTIME("Shutdown");
 			delete application;
 			PROFILE_END_RUNTIME();
+
+			if (!RendererAPI::SetAPI(g_NextRendererAPI))
+			{
+				LOG_CORE_WARN("Could not set Renderer API to {0}. Defaulting to old Renderer API {1}",
+					static_cast<uint8>(g_NextRendererAPI),
+					static_cast<uint8>(RendererAPI::GetAPI()));
+				g_NextRendererAPI = RendererAPI::GetAPI();
+			}
 		}
 		while (g_RestartApplication);
 
@@ -50,4 +64,4 @@ int main(int argc, char** argv)
 }
 #endif // CONFIG_DIST
 
-#endif // PLATFORM_WINDOWS
+#endif // SYSTEM_WINDOWS

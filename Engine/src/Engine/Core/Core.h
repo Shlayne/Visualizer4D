@@ -7,3 +7,5 @@
 #include "Engine/Core/Logger.h"
 
 #include "Engine/Core/Assert.h"
+
+#include "Engine/Debug/Profiler.h"

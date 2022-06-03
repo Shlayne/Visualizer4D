@@ -1,7 +1,7 @@
 #pragma once
 
 #if CONFIG_DEBUG
-	#if PLATFORM_WINDOWS
+	#if SYSTEM_WINDOWS
 		#define DEBUG_BREAK() __debugbreak()
 	#endif
 #else

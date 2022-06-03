@@ -3,5 +3,13 @@
 
 eng::Application* CreateApplication(eng::CommandLineArgs args)
 {
-	return new eng::Application(args);
+	eng::Application* application = new eng::Application(args);
+
+	eng::WindowSpecifications windowSpecs;
+	windowSpecs.width = 1600;
+	windowSpecs.height = 900;
+	windowSpecs.title = "Visualizer 4D";
+	application->OpenWindow(windowSpecs);
+
+	return application;
 }

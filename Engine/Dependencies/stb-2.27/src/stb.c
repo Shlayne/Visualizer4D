@@ -5,7 +5,7 @@
 #include <stb_image_resize.h>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#if PLATFORM_WINDOWS && (UNICODE || _UNICODE)
+#if SYSTEM_WINDOWS && (UNICODE || _UNICODE)
 	#define STBIW_WINDOWS_UTF8
 #endif
 #include <stb_image_write.h>

@@ -37,6 +37,7 @@ include "Dependencies/premake/Custom/usestdpreproc.lua"
 include "Dependencies/Dependencies.lua"
 
 group "Dependencies/Engine"
+	include "Engine/Dependencies/glad-0.1.35"
 	include "Engine/Dependencies/glfw-3.3.7"
 	include "Engine/Dependencies/stb-2.27"
 group "Dependencies/Visualizer4D"

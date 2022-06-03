@@ -1,4 +1,4 @@
-project "stb"
+project "glad"
 	kind "StaticLib"
 	language "C"
 	cdialect "C17"
@@ -8,8 +8,9 @@ project "stb"
 	objdir ("%{wks.location}/bin-int/" .. OutputDir .. "/%{prj.name}")
 
 	files {
-		"include/*.h",
-		"src/stb.c"
+		"include/glad/glad.h",
+		"include/KHR/khrplatform.h",
+		"src/glad.c"
 	}
 
 	includedirs {
@@ -18,12 +19,6 @@ project "stb"
 
 	filter "system:windows"
 		systemversion "latest"
-
-		defines {
-			"SYSTEM_WINDOWS",
-
-			"_CRT_SECURE_NO_WARNINGS"
-		}
 
 	filter "configurations:Profile"
 		runtime "Debug"

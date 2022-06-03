@@ -40,12 +40,17 @@ project "Visualizer4D"
 
 	filter "system:windows"
 		systemversion "latest"
-		defines "PLATFORM_WINDOWS"
 		usestdpreproc "On"
 -- Until Microsoft updates Windows 10 to not have terrible code, this must be here to prevent a warning.
 		buildoptions "/wd5105"
 
+		defines "SYSTEM_WINDOWS"
+
 	filter "configurations:Profile"
+		runtime "Debug"
+		optimize "Off"
+		symbols "On"
+
 		defines {
 			"CONFIG_PROFILE",
 
@@ -54,11 +59,12 @@ project "Visualizer4D"
 			"ENABLE_STATS",
 			"ENABLE_LOGGING"
 		}
-		runtime "Debug"
-		optimize "Off"
-		symbols "On"
 
 	filter "configurations:Debug"
+		runtime "Debug"
+		optimize "Debug"
+		symbols "Full"
+
 		defines {
 			"CONFIG_DEBUG",
 
@@ -67,24 +73,24 @@ project "Visualizer4D"
 			"ENABLE_STATS",
 			"ENABLE_LOGGING"
 		}
-		runtime "Debug"
-		optimize "Debug"
-		symbols "Full"
 
 	filter "configurations:Release"
+		runtime "Release"
+		optimize "On"
+		symbols "On"
+
 		defines {
 			"CONFIG_RELEASE",
 
 			"ENABLE_STATS",
 			"ENABLE_LOGGING"
 		}
-		runtime "Release"
-		optimize "On"
-		symbols "On"
 
 	filter "configurations:Dist"
-		kind "WindowedApp"
-		defines "CONFIG_DIST"
 		runtime "Release"
 		optimize "Full"
 		symbols "Off"
+
+		defines "CONFIG_DIST"
+
+		kind "WindowedApp"
