@@ -17,6 +17,8 @@ namespace eng
 	private:
 		friend int Main(CommandLineArgs args);
 		static bool SetAPI(API api);
+		static void LoadAPI();
+		static void UnloadAPI();
 	private:
 		friend class Renderer;
 		static Scope<RendererAPI> CreateScope();
@@ -25,7 +27,7 @@ namespace eng
 	};
 }
 
-#define UNKNOWN_RENDERER_API(api) \
+#define UNKNOWN_RENDERER_API(api, ...) \
 	default: \
 		CORE_ASSERT(false, "Unknown or Unsupported Renderer API ({0})!", static_cast<uint8>(api)); \
-		return nullptr
+		return __VA_ARGS__ // Despite being va args, this is only for one return value.

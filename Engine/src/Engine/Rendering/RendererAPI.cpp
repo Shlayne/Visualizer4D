@@ -45,7 +45,7 @@ namespace eng
 #if SYSTEM_SUPPORTS_VULKAN
 		//case API::Vulkan: return eng::CreateScope<VulkanRendererAPI>();
 #endif
-		UNKNOWN_RENDERER_API(s_API);
+		UNKNOWN_RENDERER_API(s_API, nullptr);
 		}
 	}
 }

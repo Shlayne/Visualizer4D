@@ -13,10 +13,10 @@ Library = {}
 	IncludeDir["spdlog"] = "%{wks.location}/Engine/Dependencies/spdlog-1.10.0/include"
 
 	-- Header and Lib; they also don't have their own project.
---	IncludeDir["__LIBRARY_NAME__"] = "%{__LIBRARY_NAME__}/__LIBRARY_INCLUDE_PATH__"
+	--	IncludeDir["__LIBRARY_NAME__"] = "%{__LIBRARY_NAME__}/__LIBRARY_INCLUDE_PATH__"
 
 -- Library Directories
---	LibraryDir["__LIBRARY_DIR_NAME__"] = "%{__LIBRARY_DIR_NAME__}/__LIBRARY_DIR_PATH__"
+	--	LibraryDir["__LIBRARY_DIR_NAME__"] = "%{__LIBRARY_DIR_NAME__}/__LIBRARY_DIR_PATH__"
 
 -- Libraries
---	Library["__LIBRARY_NAME__"] = "%{LibraryDir.__LIBRARY_NAME__}/__LIBRARY_PATH__"
+	--	Library["__LIBRARY_NAME__"] = "%{LibraryDir.__LIBRARY_NAME__}/__LIBRARY_PATH__"

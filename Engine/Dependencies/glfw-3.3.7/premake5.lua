@@ -10,12 +10,10 @@ project "glfw"
 	files {
 		"include/glfw/glfw3.h",
 		"include/glfw/glfw3native.h",
-		"src/glfw_config.h",
 		"src/context.c",
 		"src/init.c",
 		"src/input.c",
 		"src/monitor.c",
-		"src/vulkan.c",
 		"src/window.c"
 	}
 
@@ -29,9 +27,12 @@ project "glfw"
 			"src/win32_time.c",
 			"src/win32_thread.c",
 			"src/win32_window.c",
+
 			"src/wgl_context.c",
 			"src/egl_context.c",
-			"src/osmesa_context.c"
+			"src/osmesa_context.c",
+
+			"src/vulkan.c"
 		}
 
 		defines {

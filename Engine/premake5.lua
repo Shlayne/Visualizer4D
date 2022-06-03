@@ -3,7 +3,7 @@ project "Engine"
 	language "C++"
 	cppdialect "C++20"
 	cdialect "C17"
-	staticruntime "Off"
+	staticruntime "On"
 
 	targetdir ("%{wks.location}/bin/" .. OutputDir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. OutputDir .. "/%{prj.name}")
@@ -12,9 +12,7 @@ project "Engine"
 	pchsource "src/Engine/pch.cpp"
 
 	files {
-		"src/Engine/**.c",
 		"src/Engine/**.h",
-		"src/Engine/**.hpp",
 		"src/Engine/**.cpp",
 		"src/Engine/**.inl",
 		"src/Engine.h"
@@ -59,26 +57,23 @@ project "Engine"
 
 		links {
 			-- OpenGL
-			"glad"
+			"glad",
 
 			-- TODO: Vulkan
 		}
 
 		files {
-			"src/Platform/System/Windows/**.c",
 			"src/Platform/System/Windows/**.h",
-			"src/Platform/System/Windows/**.hpp",
 			"src/Platform/System/Windows/**.cpp",
 			"src/Platform/System/Windows/**.inl",
-			
-			-- OpenGL
-			"src/Platform/Renderer/OpenGL/**.c",
+
 			"src/Platform/Renderer/OpenGL/**.h",
-			"src/Platform/Renderer/OpenGL/**.hpp",
 			"src/Platform/Renderer/OpenGL/**.cpp",
 			"src/Platform/Renderer/OpenGL/**.inl",
 
-			-- TODO: Vulkan
+			--"src/Platform/Renderer/Vulkan/**.h",
+			--"src/Platform/Renderer/Vulkan/**.cpp",
+			--"src/Platform/Renderer/Vulkan/**.inl",
 		}
 
 	filter "configurations:Profile"
@@ -119,7 +114,11 @@ project "Engine"
 			"ENABLE_LOGGING"
 		}
 
-		excludes "src/Engine/Debug/**.cpp"
+		excludes {
+			"src/Engine/Debug/**.h",
+			"src/Engine/Debug/**.cpp",
+			"src/Engine/Debug/**.inl",
+		}
 
 	filter "configurations:Dist"
 		runtime "Release"
@@ -128,4 +127,8 @@ project "Engine"
 
 		defines "CONFIG_DIST"
 
-		excludes "src/Engine/Debug/**.cpp"
+		excludes {
+			"src/Engine/Debug/**.h",
+			"src/Engine/Debug/**.cpp",
+			"src/Engine/Debug/**.inl",
+		}

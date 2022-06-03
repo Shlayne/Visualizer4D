@@ -23,6 +23,8 @@ namespace eng
 
 		do
 		{
+			RendererAPI::LoadAPI();
+
 			PROFILE_BEGIN_RUNTIME("Init");
 			Application* application = CreateApplication(args);
 			PROFILE_END_RUNTIME();
@@ -34,6 +36,8 @@ namespace eng
 			PROFILE_BEGIN_RUNTIME("Shutdown");
 			delete application;
 			PROFILE_END_RUNTIME();
+
+			RendererAPI::UnloadAPI();
 
 			if (!RendererAPI::SetAPI(g_NextRendererAPI))
 			{

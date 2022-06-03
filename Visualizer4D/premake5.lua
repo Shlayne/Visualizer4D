@@ -3,7 +3,7 @@ project "Visualizer4D"
 	language "C++"
 	cppdialect "C++20"
 	cdialect "C17"
-	staticruntime "Off"
+	staticruntime "On"
 
 	targetdir ("%{wks.location}/bin/" .. OutputDir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. OutputDir .. "/%{prj.name}")
@@ -13,8 +13,6 @@ project "Visualizer4D"
 
 	files {
 		"src/**.h",
-		"src/**.c",
-		"src/**.hpp",
 		"src/**.cpp",
 		"src/**.inl"
 	}
@@ -32,7 +30,7 @@ project "Visualizer4D"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.spdlog}"
 	}
-	
+
 	-- Add any links dependency libs via their project names here.
 	links {
 		"Engine"

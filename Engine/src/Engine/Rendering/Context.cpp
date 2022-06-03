@@ -20,7 +20,7 @@ namespace eng
 #if SYSTEM_SUPPORTS_VULKAN
 		//case RendererAPI::API::OpenGL: return eng::CreateRef<VulkanContext>(pNativeWindow);
 #endif
-		UNKNOWN_RENDERER_API(RendererAPI::GetAPI());
+		UNKNOWN_RENDERER_API(RendererAPI::GetAPI(), nullptr);
 		}
 	}
 }
