@@ -22,7 +22,6 @@ project "Engine"
 		"src",
 
 		-- Add any header and source dependency includes here.
-		"%{IncludeDir.glfw}",
 		"%{IncludeDir.stb}",
 
 		-- Add any header-only dependency includes here.
@@ -32,7 +31,6 @@ project "Engine"
 
 	-- Add any links dependency libs via their project names here.
 	links {
-		"glfw",
 		"stb"
 	}
 
@@ -45,35 +43,30 @@ project "Engine"
 		defines {
 			"SYSTEM_WINDOWS",
 			"SYSTEM_SUPPORTS_OPENGL",
-			"SYSTEM_SUPPORTS_VULKAN"
+			--"SYSTEM_SUPPORTS_VULKAN", -- This will be disabled until I implement it.
 		}
 
 		includedirs {
-			-- OpenGL
 			"%{IncludeDir.glad}",
+			"%{IncludeDir.glfw}",
 
-			-- TODO: Vulkan
+			"src/Platform/RendererAPI/OpenGL/src",
+			--"src/Platform/RendererAPI/Vulkan/src",
 		}
 
 		links {
-			-- OpenGL
-			"glad",
+			"glfw",
 
-			-- TODO: Vulkan
+			-- The static libs have to always be linked on their supported platforms,
+			-- because they are static libs and have to be. Their dll counterparts don't.
+			"OpenGLRendererAPI",
+			--"VulkanRendererAPI",
 		}
 
 		files {
 			"src/Platform/System/Windows/**.h",
 			"src/Platform/System/Windows/**.cpp",
 			"src/Platform/System/Windows/**.inl",
-
-			"src/Platform/Renderer/OpenGL/**.h",
-			"src/Platform/Renderer/OpenGL/**.cpp",
-			"src/Platform/Renderer/OpenGL/**.inl",
-
-			--"src/Platform/Renderer/Vulkan/**.h",
-			--"src/Platform/Renderer/Vulkan/**.cpp",
-			--"src/Platform/Renderer/Vulkan/**.inl",
 		}
 
 	filter "configurations:Profile"

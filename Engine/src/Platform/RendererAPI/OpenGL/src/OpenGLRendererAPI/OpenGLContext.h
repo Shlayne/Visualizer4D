@@ -5,10 +5,13 @@
 #if SYSTEM_WINDOWS
 	#include <glfw/glfw3.h>
 #endif
+#include "OpenGLRendererAPI/OpenGLRendererAPIBind.h"
 
+#pragma warning(push)
+#pragma warning(disable: 4275)
 namespace eng
 {
-	class OpenGLContext : public Context
+	class OPENGL_RENDERER_API OpenGLContext : public Context
 	{
 	public:
 		OpenGLContext(void* pNativeWindow);
@@ -25,3 +28,4 @@ namespace eng
 #endif
 	};
 }
+#pragma warning(pop)

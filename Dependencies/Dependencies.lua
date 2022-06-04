@@ -4,7 +4,7 @@ Library = {}
 
 -- Include Directories
 	-- Header and Source; they have their own project.
-	IncludeDir["glad"] = "%{wks.location}/Engine/Dependencies/glad-0.1.35/include"
+	IncludeDir["glad"] = "%{wks.location}/Engine/src/Platform/RendererAPI/OpenGL/Dependencies/glad-0.1.35/include"
 	IncludeDir["glfw"] = "%{wks.location}/Engine/Dependencies/glfw-3.3.7/include"
 	IncludeDir["stb"] = "%{wks.location}/Engine/Dependencies/stb-2.27/include"
 

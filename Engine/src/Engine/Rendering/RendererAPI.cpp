@@ -1,10 +1,10 @@
 #include "Engine/pch.h"
 #include "Engine/Rendering/RendererAPI.h"
 #if SYSTEM_SUPPORTS_OPENGL
-	#include "Platform/Renderer/OpenGL/OpenGLRendererAPI.h"
+	#include "OpenGLRendererAPI/OpenGLRendererAPI.h"
 #endif
 #if SYSTEM_SUPPORTS_VULKAN
-	//#include "Platform/Renderer/Vulkan/VulkanRendererAPI.h"
+	#include "VulkanRendererAPI/VulkanRendererAPI.h"
 #endif
 
 namespace eng
@@ -19,7 +19,7 @@ namespace eng
 		case API::OpenGL: break;
 #endif
 #if SYSTEM_SUPPORTS_VULKAN
-		//case API::Vulkan: break;
+		case API::Vulkan: break;
 #endif
 		default: return false;
 		}
@@ -43,7 +43,7 @@ namespace eng
 		case API::OpenGL: return eng::CreateScope<OpenGLRendererAPI>();
 #endif
 #if SYSTEM_SUPPORTS_VULKAN
-		//case API::Vulkan: return eng::CreateScope<VulkanRendererAPI>();
+		case API::Vulkan: return eng::CreateScope<VulkanRendererAPI>();
 #endif
 		UNKNOWN_RENDERER_API(s_API, nullptr);
 		}

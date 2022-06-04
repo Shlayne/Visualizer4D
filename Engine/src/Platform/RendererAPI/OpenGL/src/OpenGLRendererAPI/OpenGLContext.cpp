@@ -1,5 +1,5 @@
-#include "Engine/pch.h"
-#include "Platform/Renderer/OpenGL/OpenGLContext.h"
+#include "OpenGLRendererAPI/OpenGLContext.h"
+#include "OpenGLRendererAPI/OpenGLLogger.h"
 
 namespace eng
 {
@@ -7,21 +7,17 @@ namespace eng
 #if SYSTEM_WINDOWS
 		: m_pWindow((GLFWwindow*)pNativeWindow)
 	{
-		PROFILE_FUNCTION();
-
 		CORE_ASSERT(m_pWindow != NULL, "Context's Window is null!");
-		glfwMakeContextCurrent(m_pWindow);
-		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		CORE_ASSERT(status != 0, "Failed to initialize GLAD!");
+		Bind::glfwMakeContextCurrent(m_pWindow);
+		int status = gladLoadGLLoader((GLADloadproc)Bind::glfwGetProcAddress);
+		CORE_ASSERT(status != 0, "Failed to initialize GLAD loader!");
 	}
 #endif
 
 	void OpenGLContext::SwapBuffers()
 	{
-		PROFILE_FUNCTION();
-
 #if SYSTEM_WINDOWS
-		glfwSwapBuffers(m_pWindow);
+		Bind::glfwSwapBuffers(m_pWindow);
 #endif
 	}
 
