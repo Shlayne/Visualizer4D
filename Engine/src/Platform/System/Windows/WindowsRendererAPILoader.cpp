@@ -16,7 +16,7 @@ namespace eng
 	{
 		CORE_ASSERT(s_hLibModule == NULL, "Attempted to reload Renderer API without restarting!");
 
-		switch (s_API)
+		switch (RendererAPI::GetAPI())
 		{
 #if SYSTEM_SUPPORTS_OPENGL
 		case API::OpenGL:
@@ -48,7 +48,7 @@ namespace eng
 
 			break;
 #endif
-		UNKNOWN_RENDERER_API(s_API);
+		UNKNOWN_RENDERER_API(RendererAPI::GetAPI());
 		}
 	}
 

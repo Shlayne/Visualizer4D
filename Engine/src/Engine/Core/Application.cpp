@@ -13,6 +13,8 @@ namespace eng
 	{
 		CORE_ASSERT(s_pApplication == nullptr, "Attempted to recreate Application!");
 		s_pApplication = this;
+
+		Input::SetEventCallback(BIND_FUNC(OnEvent));
 	}
 
 	Application::~Application()
@@ -40,14 +42,34 @@ namespace eng
 		m_Running = false;
 	}
 
-	Ref<Window> Application::OpenWindow(const WindowSpecifications& crWindowSpecs, bool shareContext)
+	Window& Application::OpenWindow(const WindowSpecifications& crWindowSpecs, bool shareContext)
 	{
-		return m_Windows.emplace_back(Window::CreateRef(crWindowSpecs, shareContext && !m_Windows.empty() ? m_Windows.front() : nullptr));
+		return *m_Windows.emplace_back(Window::CreateRef(crWindowSpecs, shareContext && !m_Windows.empty() ? m_Windows.front() : nullptr));
 	}
 
-	Ref<Window> Application::GetWindow(size_t index)
+	Window& Application::GetWindow(size_t index)
 	{
-		return index < m_Windows.size() ? m_Windows[index] : nullptr;
+		CORE_ASSERT(index < m_Windows.size(), "Window index out of bounds!");
+		return *m_Windows[index];
+	}
+
+	void Application::CloseWindow(size_t index)
+	{
+		CORE_ASSERT(index < m_Windows.size(), "Window index out of bounds!");
+		m_Windows[index]->Close(); // Mark the window for deletion.
+	}
+
+	size_t Application::GetWindowIndex(void* pNativeWindow)
+	{
+		for (size_t i = 0; i < m_Windows.size(); i++)
+			if (m_Windows[i]->GetNativeWindow() == pNativeWindow)
+				return i;
+		return m_Windows.size();
+	}
+
+	void Application::OnEvent(Event& event)
+	{
+
 	}
 
 	void Application::Run()
@@ -59,12 +81,26 @@ namespace eng
 		while (m_Running)
 		{
 			timestep = Input::GetElapsedTime();
+			Input::PollEvents();
 
 			if (!m_Windows.empty())
 			{
-				for (auto& window : m_Windows)
-					window->GetContext()->SwapBuffers();
-				Window::PollEvents();
+				for (auto& rWindow : m_Windows)
+					rWindow->GetContext()->SwapBuffers();
+
+				// Remove closed windows synchronously.
+				for (size_t i = 0; i < m_Windows.size(); i++)
+				{
+					auto& rWindow = m_Windows[i];
+					if (rWindow->ShouldClose())
+					{
+						rWindow.reset(); // Delete the window.
+						m_Windows.erase(m_Windows.begin() + i);
+					}
+				}
+
+				if (m_Windows.empty())
+					Close();
 			}
 		}
 	}

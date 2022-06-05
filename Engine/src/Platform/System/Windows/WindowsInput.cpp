@@ -4,6 +4,8 @@
 
 namespace eng
 {
+	static EventCallback s_fEventCallback = nullptr;
+
 	Timestep Input::GetElapsedTime()
 	{
 		static float s_LastTime = 0.0f;
@@ -11,5 +13,20 @@ namespace eng
 		Timestep timestep = time - s_LastTime;
 		s_LastTime = time;
 		return timestep;
+	}
+
+	void Input::SetEventCallback(const eng::EventCallback& crfEventCallback)
+	{
+		s_fEventCallback = crfEventCallback;
+	}
+
+	void Input::PollEvents()
+	{
+		glfwPollEvents();
+	}
+
+	void Input::EventCallback(Event& event)
+	{
+		s_fEventCallback(event);
 	}
 }

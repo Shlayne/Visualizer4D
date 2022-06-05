@@ -12,7 +12,7 @@ namespace eng
 		// TODO: api functions.
 	public:
 		enum class API : uint8 { None, OpenGL, Vulkan };
-		static inline API GetAPI() { return s_API; }
+		static API GetAPI();
 		static bool SupportsAPI(API api);
 	private:
 		friend int Main(CommandLineArgs args);
@@ -22,8 +22,6 @@ namespace eng
 	private:
 		friend class Renderer;
 		static Scope<RendererAPI> CreateScope();
-	private:
-		static API s_API;
 	};
 }
 

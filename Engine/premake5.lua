@@ -124,4 +124,8 @@ project "Engine"
 			"src/Engine/Debug/**.h",
 			"src/Engine/Debug/**.cpp",
 			"src/Engine/Debug/**.inl",
+			"src/Engine/Events/WindowEvents.cpp",
+			"src/Engine/Events/KeyEvents.cpp",
+			"src/Engine/Events/MouseEvents.cpp",
+			"src/Engine/Events/DeviceEvents.cpp",
 		}

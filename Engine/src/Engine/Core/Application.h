@@ -3,6 +3,8 @@
 #include "Engine/Core/Core.h"
 #include "Engine/Core/CommandLineArgs.h"
 #include "Engine/Core/Window.h"
+#include "Engine/Events/Event.h"
+#include "Engine/Events/WindowEvents.h"
 #include "Engine/Rendering/RendererAPI.h"
 #include <vector>
 
@@ -18,8 +20,13 @@ namespace eng
 		void Restart(RendererAPI::API nextRendererAPI = RendererAPI::GetAPI());
 		void Close();
 	public:
-		Ref<Window> OpenWindow(const WindowSpecifications& crWindowSpecs, bool shareContext = true);
-		Ref<Window> GetWindow(size_t index = 0);
+		Window& OpenWindow(const WindowSpecifications& crWindowSpecs, bool shareContext = true);
+		Window& GetWindow(size_t index = 0);
+		void CloseWindow(size_t index = 0);
+	private:
+		size_t GetWindowIndex(void* pNativeWindow);
+	private:
+		void OnEvent(Event& event);
 	private:
 		std::vector<Ref<Window>> m_Windows;
 	private:

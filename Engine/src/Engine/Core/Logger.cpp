@@ -1,4 +1,5 @@
 #include "Engine/pch.h"
+#if ENABLE_LOGGING
 #include "Engine/Core/Logger.h"
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -25,3 +26,5 @@ namespace eng
 		s_ClientLogger->flush_on(spdlog::level::trace);
 	}
 }
+
+#endif

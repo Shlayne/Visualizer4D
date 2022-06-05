@@ -9,7 +9,12 @@
 
 namespace eng
 {
-	RendererAPI::API RendererAPI::s_API = RendererAPI::API::None;
+	static RendererAPI::API s_API = RendererAPI::API::None;
+
+	RendererAPI::API RendererAPI::GetAPI()
+	{
+		return s_API;
+	}
 
 	bool RendererAPI::SupportsAPI(API api)
 	{
