@@ -2,6 +2,7 @@
 #include "Platform/System/Windows/WindowsInput.h"
 #include "Engine/Events/DeviceEvents.h"
 #include "Platform/System/Windows/WindowsConversions.h"
+#define GLFW_INCLUDE_NONE
 #include <glfw/glfw3.h>
 
 namespace eng

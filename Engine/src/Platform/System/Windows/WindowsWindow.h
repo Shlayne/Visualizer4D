@@ -2,6 +2,7 @@
 
 #include "Engine/Core/Window.h"
 #include "Engine/Rendering/Context.h"
+#define GLFW_INCLUDE_NONE
 #include <glfw/glfw3.h>
 
 namespace eng

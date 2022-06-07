@@ -20,10 +20,11 @@ namespace eng
 
 	Application::~Application()
 	{
+		CORE_ASSERT(s_pApplication != nullptr, "Attempted to redestroy Application!");
+
 		m_Windows.clear();
 		DestroyScope(m_Input);
 
-		CORE_ASSERT(s_pApplication != nullptr, "Attempted to redestroy Application!");
 		s_pApplication = nullptr;
 	}
 

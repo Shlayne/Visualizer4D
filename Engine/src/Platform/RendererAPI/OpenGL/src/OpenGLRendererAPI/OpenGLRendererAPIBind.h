@@ -10,6 +10,7 @@
 
 #include "Engine/Core/Core.h"
 #if SYSTEM_WINDOWS
+	#define GLFW_INCLUDE_NONE
 	#include <glfw/glfw3.h>
 #endif
 
