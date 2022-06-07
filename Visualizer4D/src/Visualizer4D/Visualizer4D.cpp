@@ -1,15 +1,18 @@
 #include "Visualizer4D/pch.h"
 #include <Engine/Core/EntryPoint.h>
 
-eng::Application* CreateApplication(eng::CommandLineArgs args)
+namespace eng
 {
-	eng::Application* application = new eng::Application(args);
+	Application* CreateApplication(CommandLineArgs args)
+	{
+		Application* pApplication = new Application(args);
 
-	eng::WindowSpecifications windowSpecs;
-	windowSpecs.width = 1600;
-	windowSpecs.height = 900;
-	windowSpecs.title = "Visualizer 4D";
-	application->OpenWindow(windowSpecs);
+		WindowSpecifications windowSpecs;
+		windowSpecs.width = 1600;
+		windowSpecs.height = 900;
+		windowSpecs.title = "Visualizer 4D";
+		pApplication->OpenWindow(windowSpecs);
 
-	return application;
+		return pApplication;
+	}
 }

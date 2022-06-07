@@ -26,7 +26,7 @@ namespace eng
 	class Window
 	{
 	public:
-		static Ref<Window> CreateRef(const WindowSpecifications& crSpecs, const Ref<Window>& crShareContextWindow);
+		static Scope<Window> CreateScope(const WindowSpecifications& crSpecs, const Scope<Window>& crShareContextWindow);
 		virtual ~Window() = default;
 	public:
 		virtual sint32 GetWidth() const = 0;
@@ -63,13 +63,13 @@ namespace eng
 		virtual void SetMouseCapture(bool mouseCaptured) = 0;
 		virtual void ToggleMouseCapture() = 0;
 	public:
-		virtual const Ref<Context>& GetContext() const = 0;
+		virtual const Scope<Context>& GetContext() const = 0;
 		virtual void* GetNativeWindow() = 0;
 		virtual const void* GetNativeWindow() const = 0;
 	public:
 		virtual bool ShouldClose() const = 0;
 		virtual void Close() = 0;
 	protected:
-		static void EventCallback(Event& rEvent);
+		static void OnEvent(Event& rEvent);
 	};
 }

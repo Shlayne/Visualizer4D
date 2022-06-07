@@ -9,7 +9,7 @@ namespace eng
 	class WindowsWindow : public Window
 	{
 	public:
-		WindowsWindow(const WindowSpecifications& crSpecs, const Ref<Window>& crShareContextWindow);
+		WindowsWindow(const WindowSpecifications& crSpecs, const Scope<Window>& crShareContextWindow);
 		virtual ~WindowsWindow();
 	public:
 		inline virtual sint32 GetWidth() const override { return m_State.current.size.x; }
@@ -48,7 +48,7 @@ namespace eng
 	public:
 		inline virtual void* GetNativeWindow() override { return m_pWindow; }
 		inline virtual const void* GetNativeWindow() const override { return m_pWindow; }
-		inline virtual const Ref<Context>& GetContext() const override { return m_rContext; }
+		inline virtual const Scope<Context>& GetContext() const override { return m_rContext; }
 	public:
 		virtual bool ShouldClose() const override;
 		inline virtual void Close() override { m_ShouldClose = true; }
@@ -75,7 +75,7 @@ namespace eng
 		};
 	private:
 		GLFWwindow* m_pWindow = NULL;
-		Ref<Context> m_rContext = nullptr;
+		Scope<Context> m_rContext = nullptr;
 		State m_State;
 		bool m_ShouldClose : 1 = false;
 		bool m_HasSharedContext : 1 = false;

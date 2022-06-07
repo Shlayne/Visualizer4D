@@ -1,6 +1,5 @@
 #include "Engine/pch.h"
 #include "Engine/Core/Application.h"
-#include "Engine/Core/Input.h"
 
 extern bool g_RestartApplication;
 extern eng::RendererAPI::API g_NextRendererAPI;
@@ -11,15 +10,18 @@ namespace eng
 
 	Application::Application(CommandLineArgs args)
 	{
+		UNUSED(args); // TODO
+
 		CORE_ASSERT(s_pApplication == nullptr, "Attempted to recreate Application!");
 		s_pApplication = this;
 
-		Input::Init(BIND_FUNC(OnEvent));
+		m_Input = Input::CreateScope(BIND_FUNC(OnEvent));
 	}
 
 	Application::~Application()
 	{
-		Input::Shutdown();
+		m_Windows.clear();
+		DestroyScope(m_Input);
 
 		CORE_ASSERT(s_pApplication != nullptr, "Attempted to redestroy Application!");
 		s_pApplication = nullptr;
@@ -47,7 +49,7 @@ namespace eng
 
 	Window& Application::OpenWindow(const WindowSpecifications& crWindowSpecs)
 	{
-		return *m_Windows.emplace_back(Window::CreateRef(crWindowSpecs, !m_Windows.empty() ? m_Windows.front() : nullptr));
+		return *m_Windows.emplace_back(m_Windows.empty() ? Window::CreateScope(crWindowSpecs, nullptr) : Window::CreateScope(crWindowSpecs, m_Windows.front()));
 	}
 
 	Window& Application::GetWindow(size_t index)
@@ -77,48 +79,39 @@ namespace eng
 
 	void Application::OnEvent(Event& rEvent)
 	{
-		rEvent.Dispatch(&Input::OnKeyPressEvent);
-		rEvent.Dispatch(&Input::OnKeyReleaseEvent);
-		rEvent.Dispatch(&Input::OnMouseButtonPressEvent);
-		rEvent.Dispatch(&Input::OnMouseButtonReleaseEvent);
+
 	}
 
 	void Application::Run()
 	{
 		CORE_ASSERT(m_Running == false, "Cannot run the application while it is already running!");
+		CORE_ASSERT(!m_Windows.empty(), "Application must have at least one window to run!");
 		m_Running = true;
 
-		Timestep timestep;
+		Input& input = *m_Input;
 		while (m_Running)
 		{
-			timestep = Input::GetElapsedTime();
-			Input::PollEvents();
+			Timestep timestep = input.GetElapsedTime();
+			input.PollEvents();
 
 			//Update(timestep);
 
-			if (!m_Windows.empty())
+			// Iterate over windows backwards for two reasons.
+			// 1) If the first window should be closed, which also means all other windows should be closed,
+			//		then close the other windows first.
+			// 2) Swapping all other windows before the first one takes the time that the first window
+			//		would spend waiting for vsync, i.e. it's faster.
+			Window& rFirstWindow = *m_Windows.front();
+			for (size_t i = m_Windows.size(); i; )
 			{
-				Window& firstWindow = *m_Windows.front();
-
-				// Iterate over windows backwards for two reasons.
-				// 1) If the first window should be closed, which also means all other windows should be closed,
-				//		then close the other windows first.
-				// 2) Swapping all other windows before the first one takes the time that the first window
-				//		would spend waiting for vsync, i.e. faster.
-				for (size_t i = m_Windows.size(); i; )
-				{
-					auto& rWindow = m_Windows[--i];
-					rWindow->GetContext()->SwapBuffers();
-					if (firstWindow.ShouldClose() || rWindow->ShouldClose())
-					{
-						rWindow.reset(); // Delete the window.
-						m_Windows.erase(m_Windows.begin() + i);
-					}
-				}
-
-				if (m_Windows.empty())
-					Close();
+				auto& rWindow = *m_Windows[--i];
+				rWindow.GetContext()->SwapBuffers();
+				if (rFirstWindow.ShouldClose() || rWindow.ShouldClose())
+					m_Windows.erase(m_Windows.begin() + i);
 			}
+
+			if (m_Windows.empty())
+				Close();
 		}
 	}
 }

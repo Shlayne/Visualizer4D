@@ -10,15 +10,15 @@
 
 namespace eng
 {
-	Ref<Context> Context::CreateRef(void* pNativeWindow)
+	Scope<Context> Context::CreateScope(void* pNativeWindow)
 	{
 		switch (RendererAPI::GetAPI())
 		{
 #if SYSTEM_SUPPORTS_OPENGL
-		case RendererAPI::API::OpenGL: return eng::CreateRef<OpenGLContext>(pNativeWindow);
+		case RendererAPI::API::OpenGL: return eng::CreateScope<OpenGLContext>(pNativeWindow);
 #endif
 #if SYSTEM_SUPPORTS_VULKAN
-		case RendererAPI::API::Vulkan: return eng::CreateRef<VulkanContext>(pNativeWindow);
+		case RendererAPI::API::Vulkan: return eng::CreateScope<VulkanContext>(pNativeWindow);
 #endif
 		UNKNOWN_RENDERER_API(RendererAPI::GetAPI(), nullptr);
 		}

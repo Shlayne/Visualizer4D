@@ -16,6 +16,14 @@ namespace eng
 		return s_API;
 	}
 
+	bool RendererAPI::SetAPI(API api)
+	{
+		if (!SupportsAPI(api))
+			return false;
+		s_API = api;
+		return true;
+	}
+
 	bool RendererAPI::SupportsAPI(API api)
 	{
 		switch (api)
@@ -29,14 +37,6 @@ namespace eng
 		default: return false;
 		}
 
-		return true;
-	}
-
-	bool RendererAPI::SetAPI(API api)
-	{
-		if (!SupportsAPI(api))
-			return false;
-		s_API = api;
 		return true;
 	}
 

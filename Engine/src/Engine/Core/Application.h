@@ -2,6 +2,7 @@
 
 #include "Engine/Core/Core.h"
 #include "Engine/Core/CommandLineArgs.h"
+#include "Engine/Core/Input.h"
 #include "Engine/Core/Window.h"
 #include "Engine/Events/Event.h"
 #include "Engine/Events/WindowEvents.h"
@@ -13,8 +14,6 @@ namespace eng
 	class Application
 	{
 	public:
-		Application(CommandLineArgs args);
-		virtual ~Application();
 		static Application& Get();
 	public:
 		void Restart(RendererAPI::API nextRendererAPI = RendererAPI::GetAPI());
@@ -28,11 +27,24 @@ namespace eng
 	private:
 		void OnEvent(Event& rEvent);
 	private:
-		std::vector<Ref<Window>> m_Windows;
+		friend class Input;
+		inline Input& GetInput() { return *m_Input; }
+	private:
+		Scope<Input> m_Input;
+		std::vector<Scope<Window>> m_Windows;
 	private:
 		bool m_Running = false;
 	private:
 		friend int Main(CommandLineArgs args);
 		void Run();
+	protected:
+		friend Application* CreateApplication(CommandLineArgs args);
+		Application(CommandLineArgs args);
+		virtual ~Application();
+	private:
+		Application(const Application&) = delete;
+		Application(Application&&) = delete;
+		Application& operator=(const Application&) = delete;
+		Application& operator=(Application&&) = delete;
 	};
 }

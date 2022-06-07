@@ -6,13 +6,13 @@
 #include "Engine/Core/Logger.h"
 #include "Engine/Debug/Profiler.h"
 
-extern eng::Application* CreateApplication(eng::CommandLineArgs args);
-
 bool g_RestartApplication = true;
 eng::RendererAPI::API g_NextRendererAPI = eng::RendererAPI::API::None;
 
 namespace eng
 {
+	extern Application* CreateApplication(CommandLineArgs args);
+
 	int Main(CommandLineArgs args)
 	{
 #if ENABLE_LOGGING
@@ -25,9 +25,8 @@ namespace eng
 
 		do
 		{
-			RendererAPI::LoadAPI();
-
 			PROFILE_BEGIN_RUNTIME("Init");
+			RendererAPI::LoadAPI();
 			Application* application = CreateApplication(args);
 			PROFILE_END_RUNTIME();
 
@@ -37,9 +36,8 @@ namespace eng
 
 			PROFILE_BEGIN_RUNTIME("Shutdown");
 			delete application;
-			PROFILE_END_RUNTIME();
-
 			RendererAPI::UnloadAPI();
+			PROFILE_END_RUNTIME();
 
 			if (!RendererAPI::SetAPI(g_NextRendererAPI))
 			{

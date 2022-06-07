@@ -15,7 +15,7 @@
 
 namespace eng
 {
-	WindowsWindow::WindowsWindow(const WindowSpecifications& crSpecs, const Ref<Window>& crShareContextWindow)
+	WindowsWindow::WindowsWindow(const WindowSpecifications& crSpecs, const Scope<Window>& crShareContextWindow)
 	{
 		PROFILE_FUNCTION();
 
@@ -62,8 +62,8 @@ namespace eng
 		glfwSetWindowUserPointer(m_pWindow, &m_State);
 
 		{
-			PROFILE_SCOPE("Context::CreateRef");
-			m_rContext = Context::CreateRef(m_pWindow);
+			PROFILE_SCOPE("Context::CreateScope");
+			m_rContext = Context::CreateScope(m_pWindow);
 		}
 		SetVsync(crSpecs.vsync);
 		SetMouseCapture(crSpecs.mouseCaptured);
@@ -224,7 +224,7 @@ namespace eng
 		if (State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow)))
 		{
 			WindowCloseEvent event(pWindow);
-			EventCallback(event);
+			OnEvent(event);
 		}
 
 		POP_CONTEXT();
@@ -240,7 +240,7 @@ namespace eng
 			state.current.size = { width, height };
 
 			WindowResizeEvent event(pWindow, width, height);
-			EventCallback(event);
+			OnEvent(event);
 		}
 
 		POP_CONTEXT();
@@ -256,7 +256,7 @@ namespace eng
 			state.current.position = { x, y };
 
 			WindowMoveEvent event(pWindow, x, y);
-			EventCallback(event);
+			OnEvent(event);
 		}
 
 		POP_CONTEXT();
@@ -272,7 +272,7 @@ namespace eng
 			state.focused = focused == GLFW_TRUE;
 
 			WindowFocusEvent event(pWindow, state.focused);
-			EventCallback(event);
+			OnEvent(event);
 		}
 
 		POP_CONTEXT();
@@ -288,7 +288,7 @@ namespace eng
 			state.minimized = iconified == GLFW_TRUE;
 
 			WindowMinimizeEvent event(pWindow, state.minimized);
-			EventCallback(event);
+			OnEvent(event);
 		}
 
 		POP_CONTEXT();
@@ -304,7 +304,7 @@ namespace eng
 			state.maximized = maximized == GLFW_TRUE;
 
 			WindowMaximizeEvent event(pWindow, state.maximized);
-			EventCallback(event);
+			OnEvent(event);
 		}
 
 		POP_CONTEXT();
@@ -317,7 +317,7 @@ namespace eng
 		if (State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow)))
 		{
 			WindowPathDropEvent event(pWindow, count, ppPaths);
-			EventCallback(event);
+			OnEvent(event);
 		}
 
 		POP_CONTEXT();
@@ -333,7 +333,7 @@ namespace eng
 			state.current.framebufferSize = { width, height };
 
 			WindowFramebufferResizeEvent event(pWindow, width, height);
-			EventCallback(event);
+			OnEvent(event);
 		}
 
 		POP_CONTEXT();
@@ -346,7 +346,7 @@ namespace eng
 		if (State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow)))
 		{
 			WindowContentScaleEvent event(pWindow, scaleX, scaleY);
-			EventCallback(event);
+			OnEvent(event);
 		}
 
 		POP_CONTEXT();
@@ -359,7 +359,7 @@ namespace eng
 		if (State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow)))
 		{
 			WindowRefreshEvent event(pWindow);
-			EventCallback(event);
+			OnEvent(event);
 		}
 
 		POP_CONTEXT();
@@ -377,19 +377,19 @@ namespace eng
 				case GLFW_PRESS:
 				{
 					KeyPressEvent event(pWindow, ConvertKeycode(keycode), ConvertModifiers(modifiers));
-					EventCallback(event);
+					OnEvent(event);
 					break;
 				}
 				case GLFW_REPEAT:
 				{
 					KeyRepeatEvent event(pWindow, ConvertKeycode(keycode), ConvertModifiers(modifiers));
-					EventCallback(event);
+					OnEvent(event);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
 					KeyReleaseEvent event(pWindow, ConvertKeycode(keycode), ConvertModifiers(modifiers));
-					EventCallback(event);
+					OnEvent(event);
 					break;
 				}
 			}
@@ -405,7 +405,7 @@ namespace eng
 		if (State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow)))
 		{
 			CharTypeEvent event(pWindow, codepoint);
-			EventCallback(event);
+			OnEvent(event);
 		}
 
 		POP_CONTEXT();
@@ -423,13 +423,13 @@ namespace eng
 				case GLFW_PRESS:
 				{
 					MouseButtonPressEvent event(pWindow, ConvertMouseButton(button), ConvertModifiers(modifiers));
-					EventCallback(event);
+					OnEvent(event);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
 					MouseButtonReleaseEvent event(pWindow, ConvertMouseButton(button), ConvertModifiers(modifiers));
-					EventCallback(event);
+					OnEvent(event);
 					break;
 				}
 			}
@@ -445,7 +445,7 @@ namespace eng
 		if (State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow)))
 		{
 			MouseMoveEvent event(pWindow, static_cast<float>(x), static_cast<float>(y));
-			EventCallback(event);
+			OnEvent(event);
 		}
 
 		POP_CONTEXT();
@@ -458,7 +458,7 @@ namespace eng
 		if (State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow)))
 		{
 			MouseScrollEvent event(pWindow, static_cast<float>(offsetX), static_cast<float>(offsetY));
-			EventCallback(event);
+			OnEvent(event);
 		}
 
 		POP_CONTEXT();
@@ -474,7 +474,7 @@ namespace eng
 			state.mouseContained = entered == GLFW_TRUE;
 
 			MouseEnterEvent event(pWindow, state.mouseContained);
-			EventCallback(event);
+			OnEvent(event);
 		}
 
 		POP_CONTEXT();

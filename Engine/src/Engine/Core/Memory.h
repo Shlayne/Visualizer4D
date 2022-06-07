@@ -14,6 +14,12 @@ namespace eng
 		return std::make_shared<T>(std::forward<Args>(args)...);
 	}
 
+	template<typename T>
+	inline void DestroyRef(Ref<T>& ref) noexcept
+	{
+		ref.reset();
+	}
+
 	// Scope
 	template<typename T>
 	using Scope = std::unique_ptr<T>;
@@ -22,5 +28,11 @@ namespace eng
 	constexpr Scope<T> CreateScope(Args&&... args)
 	{
 		return std::make_unique<T>(std::forward<Args>(args)...);
+	}
+
+	template<typename T>
+	inline void DestroyScope(Scope<T>& scope) noexcept
+	{
+		scope.reset();
 	}
 }

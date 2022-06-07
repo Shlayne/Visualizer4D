@@ -1,31 +1,68 @@
 #include "Engine/pch.h"
-#include "Engine/Core/Input.h"
+#include "Platform/System/Windows/WindowsInput.h"
 #include "Engine/Events/DeviceEvents.h"
 #include "Platform/System/Windows/WindowsConversions.h"
 #include <glfw/glfw3.h>
-#include "Engine/Core/Application.h"
 
 namespace eng
 {
-	static std::array<uint8, 1 + (Keycode_Count - 1) / 8> s_Keys;
-	static std::array<uint8, 1 + (MouseButton_Count - 1) / 8> s_MouseButtons;
-	static std::array<JoystickState, Joystick_Count> s_Joysticks;
-	static EventCallback s_fEventCallback = nullptr;
-	static bool s_Initialized = false;
-
-	bool Input::IsKeyPressed(Keycode keycode)
+	WindowsInput::WindowsInput(eng::EventCallback&& rrfEventCallback)
+		: m_fEventCallback(std::move(rrfEventCallback))
 	{
-		CORE_ASSERT(keycode < Keycode_Count, "Keycode index out of bounds!");
-		return !!(s_Keys[keycode / 8] & (1 << (keycode % 8)));
+		PROFILE_SCOPE("glfwInit");
+
+#if ENABLE_ASSERTS
+		UNUSED(glfwSetErrorCallback([](int errorCode, const char* pDescription)
+		{
+			CORE_ASSERT(false, "GLFW Error ({0}): {1}", errorCode, pDescription);
+		}));
+#endif
+
+		glfwInitHint(GLFW_JOYSTICK_HAT_BUTTONS, GLFW_FALSE);
+		int status = glfwInit();
+		CORE_ASSERT(status == GLFW_TRUE, "Failed to initialize GLFW!");
+
+		UNUSED(glfwSetJoystickCallback([](sint32 jid, sint32 event)
+			{
+				WindowsInput& rInput = *static_cast<WindowsInput*>(&Get());
+				switch (event)
+				{
+				case GLFW_CONNECTED: rInput.OnJoystickConnected(ConvertJoystickID(jid)); break;
+				case GLFW_DISCONNECTED: rInput.OnJoystickDisconnected(ConvertJoystickID(jid)); break;
+				}
+			}));
+
+		// Now that the joystick callback is set, emit some fake connect events
+		// for joysticks that were connected prior to running the application.
+		for (sint32 jid = GLFW_JOYSTICK_1; jid <= GLFW_JOYSTICK_LAST; jid++)
+			if (glfwJoystickPresent(jid) == GLFW_TRUE)
+				OnJoystickConnected(ConvertJoystickID(jid));
 	}
 
-	bool Input::IsMouseButtonPressed(MouseButton button)
+	WindowsInput::~WindowsInput()
 	{
-		CORE_ASSERT(button < MouseButton_Count, "Mouse Button index out of bounds!");
-		return !!(s_MouseButtons[button / 8] & (1 << (button % 8)));
+		UNUSED(glfwSetErrorCallback(NULL));
+		glfwTerminate();
+
+		// Reset all static data.
+
+		for (Joystick joystick = Joystick_1; joystick < Joystick_Count; joystick++)
+			OnJoystickDisconnected(joystick);
 	}
 
-	glm::vec2 Input::GetAbsoluteMousePosition()
+	bool WindowsInput::IsKeyPressed(Keycode keycode) const
+	{
+		CORE_ASSERT(keycode < Keycode_Count, "Keycode index={0} out of bounds!", keycode);
+		return !!(m_Keys[keycode / 8] & (1 << (keycode % 8)));
+	}
+
+	bool WindowsInput::IsMouseButtonPressed(MouseButton button) const
+	{
+		CORE_ASSERT(button < MouseButton_Count, "Mouse Button index={0} out of bounds!", button);
+		return !!(m_MouseButtons[button / 8] & (1 << (button % 8)));
+	}
+
+	glm::vec2 WindowsInput::GetAbsoluteMousePosition() const
 	{
 		GLFWwindow* pWindow = glfwGetCurrentContext();
 		CORE_ASSERT(pWindow != NULL, "Window was null!");
@@ -36,7 +73,7 @@ namespace eng
 		return glm::vec2(glm::dvec2(windowPos) + cursorPos);
 	}
 
-	glm::vec2 Input::GetRelativeMousePosition(void* pNativeWindow)
+	glm::vec2 WindowsInput::GetRelativeMousePosition(void* pNativeWindow) const
 	{
 		GLFWwindow* pWindow = static_cast<GLFWwindow*>(pNativeWindow);
 		CORE_ASSERT(pWindow != NULL, "Window was null!");
@@ -45,142 +82,43 @@ namespace eng
 		return glm::vec2(cursorPos);
 	}
 
-	bool Input::IsJoystickConnected(Joystick joystick)
+	bool WindowsInput::IsJoystickConnected(Joystick joystick) const
 	{
-		CORE_ASSERT(joystick < Joystick_Count, "Joystick index out of bounds!");
-		return s_Joysticks[joystick].IsConnected();
+		CORE_ASSERT(joystick < Joystick_Count, "Joystick index={0} out of bounds!", joystick);
+		return m_Joysticks[joystick].IsConnected();
 	}
 
-	bool Input::IsJoystickButtonPressed(Joystick joystick, JoystickButton button)
+	bool WindowsInput::IsJoystickButtonPressed(Joystick joystick, JoystickButton button) const
 	{
-		CORE_ASSERT(joystick < Joystick_Count, "Joystick index out of bounds!");
-		const JoystickState& joystickState = s_Joysticks[joystick];
+		CORE_ASSERT(joystick < Joystick_Count, "Joystick index={0} out of bounds!", joystick);
+		const JoystickState& joystickState = m_Joysticks[joystick];
 		return joystickState.IsConnected() && joystickState.GetButton(button);
 	}
 
-	float Input::GetJoystickAxis(Joystick joystick, JoystickAxis axis)
+	float WindowsInput::GetJoystickAxis(Joystick joystick, JoystickAxis axis) const
 	{
-		CORE_ASSERT(joystick < Joystick_Count, "Joystick index out of bounds!");
-		const JoystickState& joystickState = s_Joysticks[joystick];
+		CORE_ASSERT(joystick < Joystick_Count, "Joystick index={0} out of bounds!", joystick);
+		const JoystickState& joystickState = m_Joysticks[joystick];
 		return joystickState.IsConnected() ? joystickState.GetAxis(axis) : 0.0f;
 	}
 
-	JoystickHatState Input::GetJoystickHat(Joystick joystick, JoystickHat hat)
+	JoystickHatState WindowsInput::GetJoystickHat(Joystick joystick, JoystickHat hat) const
 	{
-		CORE_ASSERT(joystick < Joystick_Count, "Joystick index out of bounds!");
-		const JoystickState& joystickState = s_Joysticks[joystick];
+		CORE_ASSERT(joystick < Joystick_Count, "Joystick index={0} out of bounds!", joystick);
+		const JoystickState& joystickState = m_Joysticks[joystick];
 		return joystickState.IsConnected() ? joystickState.GetHat(hat) : JoystickHatState_Centered;
 	}
 
-	Timestep Input::GetElapsedTime()
+	Timestep WindowsInput::GetElapsedTime()
 	{
-		static float s_LastTime = 0.0f;
+		static float m_LastTime = 0.0f;
 		float time = static_cast<float>(glfwGetTime());
-		Timestep timestep = time - s_LastTime;
-		s_LastTime = time;
+		Timestep timestep = time - m_LastTime;
+		m_LastTime = time;
 		return timestep;
 	}
 
-	void Input::Init(const eng::EventCallback& crfEventCallback)
-	{
-		s_fEventCallback = crfEventCallback;
-
-		if (!s_Initialized)
-		{
-			PROFILE_SCOPE("glfwInit");
-
-#if ENABLE_ASSERTS
-			UNUSED(glfwSetErrorCallback([](int errorCode, const char* pDescription)
-			{
-				CORE_ASSERT(false, "GLFW Error ({0}): {1}", errorCode, pDescription);
-			}));
-#endif
-
-			glfwInitHint(GLFW_JOYSTICK_HAT_BUTTONS, GLFW_FALSE);
-			int status = glfwInit();
-			CORE_ASSERT(status == GLFW_TRUE, "Failed to initialize GLFW!");
-			s_Initialized = true;
-		}
-
-		UNUSED(glfwSetJoystickCallback([](sint32 jid, sint32 event)
-		{
-			switch (event)
-			{
-				case GLFW_CONNECTED: OnJoystickConnected(ConvertJoystickID(jid)); break;
-				case GLFW_DISCONNECTED: OnJoystickDisconnected(ConvertJoystickID(jid)); break;
-			}
-		}));
-
-		// Now that the joystick callback is set, emit some fake connect events
-		// for joysticks that were connected prior to running the application.
-		for (sint32 jid = GLFW_JOYSTICK_1; jid <= GLFW_JOYSTICK_LAST; jid++)
-			if (glfwJoystickPresent(jid) == GLFW_TRUE)
-				OnJoystickConnected(ConvertJoystickID(jid));
-	}
-
-	void Input::Shutdown()
-	{
-		CORE_ASSERT(s_Initialized, "Attempted to shutdown input before it was initialized!");
-		UNUSED(glfwSetErrorCallback(NULL));
-		glfwTerminate();
-
-		// Reset all static data.
-
-		s_Keys.fill(0);
-		s_MouseButtons.fill(0);
-		for (Joystick joystick = Joystick_1; joystick < Joystick_Count; joystick++)
-			OnJoystickDisconnected(joystick);
-
-		s_fEventCallback = nullptr;
-		s_Initialized = false;
-	}
-
-	void Input::OnJoystickConnected(Joystick joystick)
-	{
-		CORE_ASSERT(joystick < Joystick_Count, "Joystick index out of bounds!");
-		if (s_Joysticks[joystick].IsConnected())
-			return;
-
-		sint32 jid = UnconvertJoystickID(joystick);
-
-		sint32 buttonCount;
-		sint32 axisCount;
-		sint32 hatCount;
-		UNUSED(glfwGetJoystickHats(jid, &hatCount));
-
-		if (glfwJoystickIsGamepad(jid) == GLFW_TRUE)
-		{
-			GLFWgamepadstate gamepadState;
-
-			bool success = glfwGetGamepadState(jid, &gamepadState) == GLFW_TRUE;
-			CORE_ASSERT(success, "Joystick gamepad connect mismatch!");
-
-			buttonCount = sizeof(gamepadState.buttons) / sizeof(*gamepadState.buttons);
-			axisCount = sizeof(gamepadState.axes) / sizeof(*gamepadState.axes);
-		}
-		else
-		{
-			UNUSED(glfwGetJoystickButtons(jid, &buttonCount));
-			UNUSED(glfwGetJoystickAxes(jid, &axisCount));
-		}
-
-		s_Joysticks[joystick].Connect(buttonCount, axisCount, hatCount);
-		JoystickConnectEvent event(joystick, true);
-		EventCallback(event);
-	}
-
-	void Input::OnJoystickDisconnected(Joystick joystick)
-	{
-		CORE_ASSERT(joystick < Joystick_Count, "Joystick index out of bounds!");
-		if (!s_Joysticks[joystick].IsConnected())
-			return;
-
-		s_Joysticks[joystick].Disconnect();
-		JoystickConnectEvent event(joystick, false);
-		EventCallback(event);
-	}
-
-	void Input::PollEvents()
+	void WindowsInput::PollEvents()
 	{
 		glfwPollEvents();
 
@@ -189,7 +127,7 @@ namespace eng
 		// addition to (dis)connect) will be done through callbacks instead of polling.
 		for (sint32 jid = GLFW_JOYSTICK_1; jid <= GLFW_JOYSTICK_LAST; jid++)
 		{
-			if (JoystickState& joystickState = s_Joysticks[ConvertJoystickID(jid)]; joystickState.IsConnected())
+			if (JoystickState& joystickState = m_Joysticks[ConvertJoystickID(jid)]; joystickState.IsConnected())
 			{
 				sint32 buttonCount;
 				const uint8* pButtons;
@@ -217,45 +155,90 @@ namespace eng
 				}
 
 				for (sint32 i = 0; i < buttonCount; i++)
-					joystickState.SetButton(ConvertJoystickButton(i), pButtons[i]);
+					SetJoystickButton(joystickState, ConvertJoystickButton(i), pButtons[i]);
 				for (sint32 i = 0; i < axisCount; i++)
-					joystickState.SetAxis(ConvertJoystickAxis(i), pAxes[i]);
+					SetJoystickAxis(joystickState, ConvertJoystickAxis(i), pAxes[i]);
 				for (sint32 i = 0; i < hatCount; i++)
-					joystickState.SetHat(ConvertJoystickHat(i), pHats[i]);
+					SetJoystickHat(joystickState, ConvertJoystickHat(i), pHats[i]);
 			}
 		}
 	}
 
-	void Input::EventCallback(Event& rEvent)
+	void WindowsInput::OnEvent(Event& rEvent)
 	{
-		s_fEventCallback(rEvent);
+		rEvent.Dispatch(this, &WindowsInput::OnKeyPressEvent);
+		rEvent.Dispatch(this, &WindowsInput::OnKeyReleaseEvent);
+		rEvent.Dispatch(this, &WindowsInput::OnMouseButtonPressEvent);
+		rEvent.Dispatch(this, &WindowsInput::OnMouseButtonReleaseEvent);
+		m_fEventCallback(rEvent);
 	}
 
-	void Input::OnKeyPressEvent(KeyPressEvent& rEvent)
+	void WindowsInput::OnKeyPressEvent(KeyPressEvent& rEvent)
 	{
 		Keycode keycode = rEvent.GetKeycode();
-		CORE_ASSERT(keycode < Keycode_Count, "Keycode index out of bounds!");
-		s_Keys[keycode / 8] |= (1 << (keycode % 8));
+		CORE_ASSERT(keycode < Keycode_Count, "Keycode index={0} out of bounds!", keycode);
+		m_Keys[keycode / 8] |= (1 << (keycode % 8));
 	}
 
-	void Input::OnKeyReleaseEvent(KeyReleaseEvent& rEvent)
+	void WindowsInput::OnKeyReleaseEvent(KeyReleaseEvent& rEvent)
 	{
 		Keycode keycode = rEvent.GetKeycode();
-		CORE_ASSERT(keycode < Keycode_Count, "Keycode index out of bounds!");
-		s_Keys[keycode / 8] &= ~(1 << (keycode % 8));
+		CORE_ASSERT(keycode < Keycode_Count, "Keycode index={0} out of bounds!", keycode);
+		m_Keys[keycode / 8] &= ~(1 << (keycode % 8));
 	}
 
-	void Input::OnMouseButtonPressEvent(MouseButtonPressEvent& rEvent)
+	void WindowsInput::OnMouseButtonPressEvent(MouseButtonPressEvent& rEvent)
 	{
 		MouseButton button = rEvent.GetButton();
-		CORE_ASSERT(button < Keycode_Count, "Keycode index out of bounds!");
-		s_MouseButtons[button / 8] |= (1 << (button % 8));
+		CORE_ASSERT(button < Keycode_Count, "Keycode index={0} out of bounds!", button);
+		m_MouseButtons[button / 8] |= (1 << (button % 8));
 	}
 
-	void Input::OnMouseButtonReleaseEvent(MouseButtonReleaseEvent& rEvent)
+	void WindowsInput::OnMouseButtonReleaseEvent(MouseButtonReleaseEvent& rEvent)
 	{
 		MouseButton button = rEvent.GetButton();
-		CORE_ASSERT(button < Keycode_Count, "Keycode index out of bounds!");
-		s_MouseButtons[button / 8] &= ~(1 << (button % 8));
+		CORE_ASSERT(button < Keycode_Count, "Keycode index={0} out of bounds!", button);
+		m_MouseButtons[button / 8] &= ~(1 << (button % 8));
+	}
+
+	void WindowsInput::OnJoystickConnected(Joystick joystick)
+	{
+		CORE_ASSERT(joystick < Joystick_Count, "Joystick={0} index out of bounds!", joystick);
+		CORE_ASSERT(!m_Joysticks[joystick].IsConnected(), "Attempted to reconnect joystick!");
+
+		sint32 jid = UnconvertJoystickID(joystick);
+
+		sint32 buttonCount, axisCount, hatCount;
+		UNUSED(glfwGetJoystickHats(jid, &hatCount));
+
+		if (glfwJoystickIsGamepad(jid))
+		{
+			GLFWgamepadstate gamepadState;
+
+			bool success = glfwGetGamepadState(jid, &gamepadState);
+			CORE_ASSERT(success, "Joystick gamepad connect mismatch!");
+
+			buttonCount = sizeof(gamepadState.buttons) / sizeof(*gamepadState.buttons);
+			axisCount = sizeof(gamepadState.axes) / sizeof(*gamepadState.axes);
+		}
+		else
+		{
+			UNUSED(glfwGetJoystickButtons(jid, &buttonCount));
+			UNUSED(glfwGetJoystickAxes(jid, &axisCount));
+		}
+
+		ConnectJoystick(m_Joysticks[joystick], buttonCount, axisCount, hatCount);
+		JoystickConnectEvent event(joystick, true);
+		OnEvent(event);
+	}
+
+	void WindowsInput::OnJoystickDisconnected(Joystick joystick)
+	{
+		CORE_ASSERT(joystick < Joystick_Count, "Joystick index={0} out of bounds!", joystick);
+		CORE_ASSERT(m_Joysticks[joystick].IsConnected(), "Attempted to redisconnect joystick!");
+
+		DisconnectJoystick(m_Joysticks[joystick]);
+		JoystickConnectEvent event(joystick, false);
+		OnEvent(event);
 	}
 }
