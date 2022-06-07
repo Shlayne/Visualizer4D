@@ -10,6 +10,8 @@
 #undef LOG_ERROR
 #undef LOG_FATAL
 
+#undef ASSERT
+
 #if ENABLE_LOGGING
 	#undef LOG_CORE_TRACE
 	#undef LOG_CORE_DEBUG

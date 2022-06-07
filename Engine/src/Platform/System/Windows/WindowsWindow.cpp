@@ -4,6 +4,7 @@
 #include "Engine/Events/KeyEvents.h"
 #include "Engine/Events/MouseEvents.h"
 #include "Engine/Rendering/RendererAPI.h"
+#include "Platform/System/Windows/WindowsConversions.h"
 
 // These can only be used once per function, in this order.
 #define PUSH_CONTEXT(window) \
@@ -14,117 +15,60 @@
 
 namespace eng
 {
-	static uint32 s_OpenWindowCount = 0;
-
-#if ENABLE_ASSERTS
-	static GLFWerrorfun s_fPrevErrorCallback = nullptr;
-
-	static void ErrorCallback(int errorCode, const char* pDescription)
-	{
-		CORE_ASSERT(false, "GLFW Error ({0}): {1}", errorCode, pDescription);
-		if (s_fPrevErrorCallback != nullptr)
-			s_fPrevErrorCallback(errorCode, pDescription);
-	}
-#endif
-
-	static Keycode ConvertKeycode(sint32 keycode)
-	{
-		// TODO: I have made Keycode use the same mappings as glfw,
-		// but this *should* technically be a table to index with the keycode.
-		return static_cast<Keycode>(keycode);
-	}
-
-	static MouseButton ConvertMouseButton(sint32 button)
-	{
-		// TODO: I have made MouseButton use the same mappings as glfw,
-		// but this *should* technically be a table to index with the keycode.
-		return static_cast<MouseButton>(button);
-	}
-
-	static Modifiers ConvertModifiers(sint32 modifiers)
-	{
-		return (modifiers & GLFW_MOD_SHIFT     ? Modifiers_Shift    : Modifiers_None) |
-			   (modifiers & GLFW_MOD_CONTROL   ? Modifiers_Control  : Modifiers_None) |
-			   (modifiers & GLFW_MOD_ALT       ? Modifiers_Alt      : Modifiers_None) |
-			   (modifiers & GLFW_MOD_SUPER     ? Modifiers_Super    : Modifiers_None) |
-			   (modifiers & GLFW_MOD_CAPS_LOCK ? Modifiers_CapsLock : Modifiers_None) |
-			   (modifiers & GLFW_MOD_NUM_LOCK  ? Modifiers_NumLock  : Modifiers_None);
-	}
-
 	WindowsWindow::WindowsWindow(const WindowSpecifications& crSpecs, const Ref<Window>& crShareContextWindow)
 	{
-		if (s_OpenWindowCount == 0)
-		{
-			PROFILE_SCOPE("glfwInit");
-
-#if ENABLE_ASSERTS
-			s_fPrevErrorCallback = glfwSetErrorCallback(&ErrorCallback);
-#endif
-
-			int status = glfwInit();
-			CORE_ASSERT(status == GLFW_TRUE, "Failed to initialize GLFW!");
-		}
+		PROFILE_FUNCTION();
 
 		m_State.current.size = { crSpecs.width, crSpecs.height };
 		m_State.title = crSpecs.title;
 		m_State.resizable = crSpecs.resizable;
-		m_State.fullscreen = crSpecs.fullscreen;
 		m_State.focused = crSpecs.focusOnShow;
+
+		m_HasSharedContext = static_cast<bool>(crShareContextWindow);
 
 		glfwWindowHint(GLFW_RESIZABLE, m_State.resizable);
 		glfwWindowHint(GLFW_FOCUS_ON_SHOW, m_State.focused);
+		glfwWindowHint(GLFW_VISIBLE, false);
+		glfwWindowHint(GLFW_DOUBLEBUFFER, true);
 #if CONFIG_DEBUG
 		if (RendererAPI::GetAPI() == RendererAPI::API::OpenGL)
-			glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+			glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 #endif
-
-		GLFWmonitor* pPrimaryMonitor = glfwGetPrimaryMonitor();
-
-		if (m_State.fullscreen)
-		{
-			m_State.preFullscreen.size = m_State.current.size;
-
-			const GLFWvidmode& crVideoMode = *glfwGetVideoMode(pPrimaryMonitor);
-			m_State.current.size = { crVideoMode.width, crVideoMode.height };
-		}
 
 		{
 			PROFILE_SCOPE("glfwCreateWindow");
 			m_pWindow = glfwCreateWindow(
 				m_State.current.size.x, m_State.current.size.y,
 				m_State.title.c_str(),
-				m_State.fullscreen ? pPrimaryMonitor : NULL,
-				crShareContextWindow ? ((WindowsWindow*)crShareContextWindow.get())->m_pWindow : NULL
+				NULL, m_HasSharedContext ? (static_cast<WindowsWindow*>(crShareContextWindow.get()))->m_pWindow : NULL
 			);
 		}
 		CORE_ASSERT(m_pWindow != NULL, "Failed to create window!");
-		s_OpenWindowCount++;
 
-		if (!m_State.fullscreen)
-		{
-			sint32 left, top, right, bottom;
-			glfwGetMonitorWorkarea(pPrimaryMonitor, &left, &top, &right, &bottom);
-			glm::s32vec2 monitorWorkArea{ right - left, bottom - top };
-			glfwGetWindowFrameSize(m_pWindow, &left, &top, &right, &bottom);
-			glm::s32vec2 windowFrameSize{ right + left, bottom + top };
+		glm::s32vec2 position{ 0 };
+		glm::s32vec2 size{ 0 };
+		glfwGetMonitorWorkarea(glfwGetPrimaryMonitor(), &position.x, &position.y, &size.x, &size.y);
+		sint32 left, top, right, bottom;
+		glfwGetWindowFrameSize(m_pWindow, &left, &top, &right, &bottom);
+		glm::s32vec2 windowFrameSize{ right - left, bottom - (top + 8) };
+		// The +8 for top is for the invisible windows 10 borders for resizing the window.
+		// Only left, right, and bottom have it, but not top. And since bottom has it and
+		// not top, the window is pushed up by 8 / 2 = 4 pixels.
 
-			m_State.current.position = glm::s32vec2{ left, top };
-			m_State.current.position += (monitorWorkArea - (m_State.current.size + windowFrameSize)) / 2;
+		m_State.current.position = position + (size - m_State.current.size - windowFrameSize) / 2;
+		glfwSetWindowPos(m_pWindow, m_State.current.position.x, m_State.current.position.y);
 
-			glfwSetWindowPos(m_pWindow, m_State.current.position.x, m_State.current.position.y);
-		}
-
-		glfwSetInputMode(m_pWindow, GLFW_LOCK_KEY_MODS, GLFW_TRUE);
+		glfwSetInputMode(m_pWindow, GLFW_LOCK_KEY_MODS, true);
 		glfwSetWindowUserPointer(m_pWindow, &m_State);
 
-		m_rContext = Context::CreateRef(m_pWindow);
+		{
+			PROFILE_SCOPE("Context::CreateRef");
+			m_rContext = Context::CreateRef(m_pWindow);
+		}
 		SetVsync(crSpecs.vsync);
 		SetMouseCapture(crSpecs.mouseCaptured);
 
-		// TODO: always create the window without a monitor.
-		// Then maximize it if crSpecs.maximizeOnShow is set.
-		// Then set the window's monitor.
-		if (crSpecs.maximizeOnShow && !m_State.fullscreen)
+		if (crSpecs.maximizeOnShow)
 		{
 			glfwMaximizeWindow(m_pWindow);
 			glfwGetWindowPos(m_pWindow, &m_State.current.position.x, &m_State.current.position.y);
@@ -133,6 +77,9 @@ namespace eng
 		}
 
 		glfwGetFramebufferSize(m_pWindow, &m_State.current.framebufferSize.x, &m_State.current.framebufferSize.y);
+
+		if (crSpecs.fullscreenOnShow)
+			SetFullscreen(true);
 
 		SetCallbacks(m_pWindow);
 		glfwShowWindow(m_pWindow);
@@ -143,15 +90,6 @@ namespace eng
 		PROFILE_FUNCTION();
 
 		glfwDestroyWindow(m_pWindow);
-		if (--s_OpenWindowCount == 0)
-		{
-#if ENABLE_ASSERTS
-			GLFWerrorfun fCallback = glfwSetErrorCallback(s_fPrevErrorCallback);
-			CORE_ASSERT(fCallback == &ErrorCallback, "The GLFW error callback was set to {0}, without being reset to {1}, between glfwInit and glfwTerminate!", static_cast<void*>(fCallback), static_cast<void*>(&ErrorCallback));
-			s_fPrevErrorCallback = nullptr;
-#endif
-			glfwTerminate();
-		}
 	}
 
 	void WindowsWindow::SetTitle(std::string_view title)
@@ -162,15 +100,18 @@ namespace eng
 
 	void WindowsWindow::SetVsync(bool vsync)
 	{
-		PUSH_CONTEXT(m_pWindow);
-		glfwSwapInterval(vsync ? 1 : 0);
-		m_State.vsync = vsync;
-		POP_CONTEXT();
+		if (!m_HasSharedContext)
+		{
+			PUSH_CONTEXT(m_pWindow);
+			glfwSwapInterval(!!vsync);
+			m_State.vsync = vsync;
+			POP_CONTEXT();
+		}
 	}
 
 	void WindowsWindow::SetResizable(bool resizable)
 	{
-		glfwSetWindowAttrib(m_pWindow, GLFW_RESIZABLE, resizable ? GLFW_TRUE : GLFW_FALSE);
+		glfwSetWindowAttrib(m_pWindow, GLFW_RESIZABLE, resizable);
 		m_State.resizable = resizable;
 	}
 
@@ -463,7 +404,7 @@ namespace eng
 
 		if (State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow)))
 		{
-			KeyCharEvent event(pWindow, codepoint);
+			CharTypeEvent event(pWindow, codepoint);
 			EventCallback(event);
 		}
 

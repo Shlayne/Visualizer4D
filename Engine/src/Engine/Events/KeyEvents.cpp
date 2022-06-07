@@ -26,7 +26,7 @@ namespace eng
 		return stream.str();
 	}
 
-	KeyCharEvent::operator std::string() const
+	CharTypeEvent::operator std::string() const
 	{
 		std::stringstream stream;
 		stream << "KeyCharEvent: codepoint=" << m_Codepoint;

@@ -14,13 +14,13 @@ namespace eng
 		sint32 height = 720; // Framebuffer height.
 		std::string_view title = "Untitled Window";
 
-		bool vsync = true;
-		bool resizable = true;
-		bool fullscreen = false;
-		bool mouseCaptured = false;
+		bool vsync : 1 = true;
+		bool resizable : 1 = true;
+		bool mouseCaptured : 1 = false;
 
-		bool focusOnShow = true;
-		bool maximizeOnShow = false;
+		bool fullscreenOnShow : 1 = false;
+		bool focusOnShow : 1 = false;
+		bool maximizeOnShow : 1 = false;
 	};
 
 	class Window
@@ -70,6 +70,6 @@ namespace eng
 		virtual bool ShouldClose() const = 0;
 		virtual void Close() = 0;
 	protected:
-		static void EventCallback(Event& event);
+		static void EventCallback(Event& rEvent);
 	};
 }

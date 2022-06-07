@@ -77,7 +77,8 @@ namespace eng
 		GLFWwindow* m_pWindow = NULL;
 		Ref<Context> m_rContext = nullptr;
 		State m_State;
-		bool m_ShouldClose = false;
+		bool m_ShouldClose : 1 = false;
+		bool m_HasSharedContext : 1 = false;
 	private:
 		static void SetCallbacks(GLFWwindow* pWindow);
 

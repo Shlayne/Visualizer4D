@@ -5,7 +5,7 @@ namespace eng
 {
 	OpenGLContext::OpenGLContext(void* pNativeWindow)
 #if SYSTEM_WINDOWS
-		: m_pWindow((GLFWwindow*)pNativeWindow)
+		: m_pWindow(static_cast<GLFWwindow*>(pNativeWindow))
 	{
 		CORE_ASSERT(m_pWindow != NULL, "Context's Window is null!");
 		Bind::glfwMakeContextCurrent(m_pWindow);

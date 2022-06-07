@@ -6,28 +6,18 @@
 
 namespace eng
 {
-	enum class MouseButton : uint8
+	using MouseButton = uint8;
+	enum : MouseButton
 	{
-		Button1 = 0, ButtonLeft     = Button1,
-		Button2 = 1, ButtonRight    = Button2,
-		Button3 = 2, ButtonMiddle   = Button3,
-		Button4 = 3, ButtonBackward = Button4,
-		Button5 = 4, ButtonForward  = Button5,
-		Button6 = 5,
-		Button7 = 6,
-		Button8 = 7,
+		MouseButton_1 = 0, MouseButton_Left     = MouseButton_1,
+		MouseButton_2 = 1, MouseButton_Right    = MouseButton_2,
+		MouseButton_3 = 2, MouseButton_Middle   = MouseButton_3,
+		MouseButton_4 = 3, MouseButton_Backward = MouseButton_4,
+		MouseButton_5 = 4, MouseButton_Forward  = MouseButton_5,
+		MouseButton_6 = 5,
+		MouseButton_7 = 6,
+		MouseButton_8 = 7,
 
-		Count
+		MouseButton_Count
 	};
 }
-
-#if ENABLE_LOGGING
-#include <ostream>
-
-template <class _Elem, class _Traits = std::char_traits<_Elem>>
-std::basic_ostream<_Elem, _Traits>& operator<<(std::basic_ostream<_Elem, _Traits>& ostream, eng::MouseButton button)
-{
-	return ostream << +static_cast<eng::uint8>(button);
-}
-#endif
-

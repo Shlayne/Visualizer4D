@@ -6,6 +6,7 @@
 		{ \
 			if (!(condition)) \
 			{ \
+				LOG##type##ERROR("Assertion ({0}) failed at {1}:{2}", (condition), __FILE__, __LINE__); \
 				LOG##type##ERROR(message __VA_OPT__(,) __VA_ARGS__); \
 				DEBUG_BREAK(); \
 			} \

@@ -72,12 +72,12 @@ namespace eng
 		Modifiers m_Modifiers;
 	};
 
-	class KeyCharEvent : public KeyEvent
+	class CharTypeEvent : public KeyEvent
 	{
 	public:
-		KeyCharEvent(void* pNativeWindow, uint32 codepoint)
+		CharTypeEvent(void* pNativeWindow, uint32 codepoint)
 			: KeyEvent(pNativeWindow), m_Codepoint(codepoint) {}
-		EVENT_TYPE(EventType::KeyChar)
+		EVENT_TYPE(EventType::CharType)
 #if ENABLE_LOGGING
 	public:
 		virtual operator std::string() const override;

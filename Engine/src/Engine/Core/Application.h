@@ -20,13 +20,13 @@ namespace eng
 		void Restart(RendererAPI::API nextRendererAPI = RendererAPI::GetAPI());
 		void Close();
 	public:
-		Window& OpenWindow(const WindowSpecifications& crWindowSpecs, bool shareContext = true);
+		Window& OpenWindow(const WindowSpecifications& crWindowSpecs);
 		Window& GetWindow(size_t index = 0);
 		void CloseWindow(size_t index = 0);
+		size_t GetWindowIndex(const void* cpNativeWindow);
+		size_t GetWindowIndex(const Window& crWindow);
 	private:
-		size_t GetWindowIndex(void* pNativeWindow);
-	private:
-		void OnEvent(Event& event);
+		void OnEvent(Event& rEvent);
 	private:
 		std::vector<Ref<Window>> m_Windows;
 	private:

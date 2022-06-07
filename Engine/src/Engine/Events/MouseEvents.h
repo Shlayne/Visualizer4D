@@ -22,7 +22,7 @@ namespace eng
 	public:
 		MouseButtonPressEvent(void* pNativeWindow, MouseButton button, Modifiers modifiers)
 			: MouseEvent(pNativeWindow), m_Button(button), m_Modifiers(modifiers) {}
-		EVENT_TYPE(EventType::MouseButtonRelease)
+		EVENT_TYPE(EventType::MouseButtonPress)
 		EVENT_CATEGORIES(EventCategory_Mouse | EventCategory_MouseButton)
 #if ENABLE_LOGGING
 		virtual operator std::string() const override;
@@ -40,7 +40,7 @@ namespace eng
 	public:
 		MouseButtonReleaseEvent(void* pNativeWindow, MouseButton button, Modifiers modifiers)
 			: MouseEvent(pNativeWindow), m_Button(button), m_Modifiers(modifiers) {}
-		EVENT_TYPE(EventType::MouseButtonPress)
+		EVENT_TYPE(EventType::MouseButtonRelease)
 		EVENT_CATEGORIES(EventCategory_Mouse | EventCategory_MouseButton)
 #if ENABLE_LOGGING
 		virtual operator std::string() const override;

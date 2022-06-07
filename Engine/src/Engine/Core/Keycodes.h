@@ -6,151 +6,142 @@
 
 namespace eng
 {
-	enum class Keycode : uint16
+	using Keycode = uint16;
+	enum : Keycode
 	{
 		/* Printable keys */
-		Space      = 32,
-		Apostrophe = 39, /* ' */
-		Comma      = 44, /* , */
-		Minus      = 45, /* - */
-		Period     = 46, /* . */
-		Slash      = 47, /* / */
+		Keycode_Space      = 32,
+		Keycode_Apostrophe = 39, /* ' */
+		Keycode_Comma      = 44, /* , */
+		Keycode_Minus      = 45, /* - */
+		Keycode_Period     = 46, /* . */
+		Keycode_Slash      = 47, /* / */
 
-		D0 = 48, /* 0 */
-		D1 = 49, /* 1 */
-		D2 = 50, /* 2 */
-		D3 = 51, /* 3 */
-		D4 = 52, /* 4 */
-		D5 = 53, /* 5 */
-		D6 = 54, /* 6 */
-		D7 = 55, /* 7 */
-		D8 = 56, /* 8 */
-		D9 = 57, /* 9 */
+		Keycode_0 = 48, /* 0 */
+		Keycode_1 = 49, /* 1 */
+		Keycode_2 = 50, /* 2 */
+		Keycode_3 = 51, /* 3 */
+		Keycode_4 = 52, /* 4 */
+		Keycode_5 = 53, /* 5 */
+		Keycode_6 = 54, /* 6 */
+		Keycode_7 = 55, /* 7 */
+		Keycode_8 = 56, /* 8 */
+		Keycode_9 = 57, /* 9 */
 
-		Semicolon = 59, /* ; */
-		Equal     = 61, /* = */
+		Keycode_Semicolon = 59, /* ; */
+		Keycode_Equal     = 61, /* = */
 
-		A = 65,
-		B = 66,
-		C = 67,
-		D = 68,
-		E = 69,
-		F = 70,
-		G = 71,
-		H = 72,
-		I = 73,
-		J = 74,
-		K = 75,
-		L = 76,
-		M = 77,
-		N = 78,
-		O = 79,
-		P = 80,
-		Q = 81,
-		R = 82,
-		S = 83,
-		T = 84,
-		U = 85,
-		V = 86,
-		W = 87,
-		X = 88,
-		Y = 89,
-		Z = 90,
+		Keycode_A = 65,
+		Keycode_B = 66,
+		Keycode_C = 67,
+		Keycode_D = 68,
+		Keycode_E = 69,
+		Keycode_F = 70,
+		Keycode_G = 71,
+		Keycode_H = 72,
+		Keycode_I = 73,
+		Keycode_J = 74,
+		Keycode_K = 75,
+		Keycode_L = 76,
+		Keycode_M = 77,
+		Keycode_N = 78,
+		Keycode_O = 79,
+		Keycode_P = 80,
+		Keycode_Q = 81,
+		Keycode_R = 82,
+		Keycode_S = 83,
+		Keycode_T = 84,
+		Keycode_U = 85,
+		Keycode_V = 86,
+		Keycode_W = 87,
+		Keycode_X = 88,
+		Keycode_Y = 89,
+		Keycode_Z = 90,
 
-		LeftBracket  =  91, /* [ */
-		BackSlash    =  92, /* \ */
-		RightBracket =  93, /* ] */
-		GraveAccent  =  96, /* ` */
-		World1       = 161, /* non-US #1 */
-		World2       = 162, /* non-US #2 */
+		Keycode_LeftBracket  =  91, /* [ */
+		Keycode_BackSlash    =  92, /* \ */
+		Keycode_RightBracket =  93, /* ] */
+		Keycode_GraveAccent  =  96, /* ` */
+		Keycode_World1       = 161, /* non-US #1 */
+		Keycode_World2       = 162, /* non-US #2 */
 
 		/* Function keys */
-		Escape      = 256,
-		Enter       = 257,
-		Tab         = 258,
-		Backspace   = 259,
-		Insert      = 260,
-		Delete      = 261,
-		Right       = 262,
-		Left        = 263,
-		Down        = 264,
-		Up          = 265,
-		PageUp      = 266,
-		PageDown    = 267,
-		Home        = 268,
-		End         = 269,
-		CapsLock    = 280,
-		ScrollLock  = 281,
-		NumLock     = 282,
-		PrintScreen = 283,
-		Pause       = 284,
+		Keycode_Escape      = 256,
+		Keycode_Enter       = 257,
+		Keycode_Tab         = 258,
+		Keycode_Backspace   = 259,
+		Keycode_Insert      = 260,
+		Keycode_Delete      = 261,
+		Keycode_Right       = 262,
+		Keycode_Left        = 263,
+		Keycode_Down        = 264,
+		Keycode_Up          = 265,
+		Keycode_PageUp      = 266,
+		Keycode_PageDown    = 267,
+		Keycode_Home        = 268,
+		Keycode_End         = 269,
+		Keycode_CapsLock    = 280,
+		Keycode_ScrollLock  = 281,
+		Keycode_NumLock     = 282,
+		Keycode_PrintScreen = 283,
+		Keycode_Pause       = 284,
 
-		F1  = 290,
-		F2  = 291,
-		F3  = 292,
-		F4  = 293,
-		F5  = 294,
-		F6  = 295,
-		F7  = 296,
-		F8  = 297,
-		F9  = 298,
-		F10 = 299,
-		F11 = 300,
-		F12 = 301,
-		F13 = 302,
-		F14 = 303,
-		F15 = 304,
-		F16 = 305,
-		F17 = 306,
-		F18 = 307,
-		F19 = 308,
-		F20 = 309,
-		F21 = 310,
-		F22 = 311,
-		F23 = 312,
-		F24 = 313,
-		F25 = 314,
+		Keycode_F1  = 290,
+		Keycode_F2  = 291,
+		Keycode_F3  = 292,
+		Keycode_F4  = 293,
+		Keycode_F5  = 294,
+		Keycode_F6  = 295,
+		Keycode_F7  = 296,
+		Keycode_F8  = 297,
+		Keycode_F9  = 298,
+		Keycode_F10 = 299,
+		Keycode_F11 = 300,
+		Keycode_F12 = 301,
+		Keycode_F13 = 302,
+		Keycode_F14 = 303,
+		Keycode_F15 = 304,
+		Keycode_F16 = 305,
+		Keycode_F17 = 306,
+		Keycode_F18 = 307,
+		Keycode_F19 = 308,
+		Keycode_F20 = 309,
+		Keycode_F21 = 310,
+		Keycode_F22 = 311,
+		Keycode_F23 = 312,
+		Keycode_F24 = 313,
+		Keycode_F25 = 314,
 
 		/* Keypad */
-		KP0 = 320,
-		KP1 = 321,
-		KP2 = 322,
-		KP3 = 323,
-		KP4 = 324,
-		KP5 = 325,
-		KP6 = 326,
-		KP7 = 327,
-		KP8 = 328,
-		KP9 = 329,
+		Keycode_Keypad_0 = 320,
+		Keycode_Keypad_1 = 321,
+		Keycode_Keypad_2 = 322,
+		Keycode_Keypad_3 = 323,
+		Keycode_Keypad_4 = 324,
+		Keycode_Keypad_5 = 325,
+		Keycode_Keypad_6 = 326,
+		Keycode_Keypad_7 = 327,
+		Keycode_Keypad_8 = 328,
+		Keycode_Keypad_9 = 329,
 
-		KPDecimal  = 330,
-		KPDivide   = 331,
-		KPMultiply = 332,
-		KPSubtract = 333,
-		KPAdd      = 334,
-		KPEnter    = 335,
-		KPEqual    = 336,
+		Keycode_Keypad_Decimal  = 330,
+		Keycode_Keypad_Divide   = 331,
+		Keycode_Keypad_Multiply = 332,
+		Keycode_Keypad_Subtract = 333,
+		Keycode_Keypad_Add      = 334,
+		Keycode_Keypad_Enter    = 335,
+		Keycode_Keypad_Equal    = 336,
 
-		LeftShift    = 340,
-		LeftControl  = 341,
-		LeftAlt      = 342,
-		LeftSuper    = 343,
-		RightShift   = 344,
-		RightControl = 345,
-		RightAlt     = 346,
-		RightSuper   = 347,
-		Menu         = 348,
+		Keycode_LeftShift    = 340,
+		Keycode_LeftControl  = 341,
+		Keycode_LeftAlt      = 342,
+		Keycode_LeftSuper    = 343,
+		Keycode_RightShift   = 344,
+		Keycode_RightControl = 345,
+		Keycode_RightAlt     = 346,
+		Keycode_RightSuper   = 347,
+		Keycode_Menu         = 348,
 
-		Count
+		Keycode_Count
 	};
 }
-
-#if ENABLE_LOGGING
-#include <ostream>
-
-template <class _Elem, class _Traits = std::char_traits<_Elem>>
-std::basic_ostream<_Elem, _Traits>& operator<<(std::basic_ostream<_Elem, _Traits>& ostream, eng::Keycode keycode)
-{
-	return ostream << static_cast<eng::uint16>(keycode);
-}
-#endif

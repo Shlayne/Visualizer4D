@@ -1,7 +1,3 @@
-// Event.inl is only ever included at the end of Event.h,
-// but Visual Studio 2022 puts errors everywhere if I don't.
-#include "Event.h"
-
 namespace eng
 {
 	inline bool Event::IsInCategories(EventCategory categories) const

@@ -1,6 +1,6 @@
 #pragma once
 
-// This should always be included, and be the last include.
+// This should always be included, and be the second to last include.
 
 #if OPENGL_RENDERER_API_EXPORT
 	#define OPENGL_RENDERER_API __declspec(dllexport)
@@ -8,9 +8,7 @@
 	#define OPENGL_RENDERER_API __declspec(dllimport)
 #endif
 
-#if ENABLE_LOGGING
-	#include "Engine/Core/Logger.h"
-#endif
+#include "Engine/Core/Core.h"
 #if SYSTEM_WINDOWS
 	#include <glfw/glfw3.h>
 #endif

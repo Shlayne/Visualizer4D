@@ -11,7 +11,7 @@ namespace eng
 	{
 		WindowClose, WindowResize, WindowFramebufferResize, WindowMove, WindowFocus,
 			WindowMinimize, WindowMaximize, WindowPathDrop, WindowContentScale, WindowRefresh,
-		KeyPress, KeyRepeat, KeyRelease, KeyChar,
+		KeyPress, KeyRepeat, KeyRelease, CharType,
 		MouseButtonPress, MouseButtonRelease, MouseMove, MouseScroll, MouseEnter,
 		JoystickConnect, MonitorConnect
 	};

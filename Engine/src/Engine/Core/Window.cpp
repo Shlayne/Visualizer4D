@@ -14,8 +14,8 @@ namespace eng
 #endif
 	}
 
-	void Window::EventCallback(Event& event)
+	void Window::EventCallback(Event& rEvent)
 	{
-		Input::EventCallback(event);
+		Input::EventCallback(rEvent);
 	}
 }

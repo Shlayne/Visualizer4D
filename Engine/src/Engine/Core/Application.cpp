@@ -14,17 +14,20 @@ namespace eng
 		CORE_ASSERT(s_pApplication == nullptr, "Attempted to recreate Application!");
 		s_pApplication = this;
 
-		Input::SetEventCallback(BIND_FUNC(OnEvent));
+		Input::Init(BIND_FUNC(OnEvent));
 	}
 
 	Application::~Application()
 	{
+		Input::Shutdown();
+
 		CORE_ASSERT(s_pApplication != nullptr, "Attempted to redestroy Application!");
 		s_pApplication = nullptr;
 	}
 
 	Application& Application::Get()
 	{
+		CORE_ASSERT(s_pApplication != nullptr, "Attempted to get the application before it was created!");
 		return *s_pApplication;
 	}
 
@@ -42,9 +45,9 @@ namespace eng
 		m_Running = false;
 	}
 
-	Window& Application::OpenWindow(const WindowSpecifications& crWindowSpecs, bool shareContext)
+	Window& Application::OpenWindow(const WindowSpecifications& crWindowSpecs)
 	{
-		return *m_Windows.emplace_back(Window::CreateRef(crWindowSpecs, shareContext && !m_Windows.empty() ? m_Windows.front() : nullptr));
+		return *m_Windows.emplace_back(Window::CreateRef(crWindowSpecs, !m_Windows.empty() ? m_Windows.front() : nullptr));
 	}
 
 	Window& Application::GetWindow(size_t index)
@@ -59,17 +62,25 @@ namespace eng
 		m_Windows[index]->Close(); // Mark the window for deletion.
 	}
 
-	size_t Application::GetWindowIndex(void* pNativeWindow)
+	size_t Application::GetWindowIndex(const void* cpNativeWindow)
 	{
 		for (size_t i = 0; i < m_Windows.size(); i++)
-			if (m_Windows[i]->GetNativeWindow() == pNativeWindow)
+			if (m_Windows[i]->GetNativeWindow() == cpNativeWindow)
 				return i;
 		return m_Windows.size();
 	}
 
-	void Application::OnEvent(Event& event)
+	size_t Application::GetWindowIndex(const Window& crWindow)
 	{
+		return GetWindowIndex(crWindow.GetNativeWindow());
+	}
 
+	void Application::OnEvent(Event& rEvent)
+	{
+		rEvent.Dispatch(&Input::OnKeyPressEvent);
+		rEvent.Dispatch(&Input::OnKeyReleaseEvent);
+		rEvent.Dispatch(&Input::OnMouseButtonPressEvent);
+		rEvent.Dispatch(&Input::OnMouseButtonReleaseEvent);
 	}
 
 	void Application::Run()
@@ -83,16 +94,22 @@ namespace eng
 			timestep = Input::GetElapsedTime();
 			Input::PollEvents();
 
+			//Update(timestep);
+
 			if (!m_Windows.empty())
 			{
-				for (auto& rWindow : m_Windows)
-					rWindow->GetContext()->SwapBuffers();
+				Window& firstWindow = *m_Windows.front();
 
-				// Remove closed windows synchronously.
-				for (size_t i = 0; i < m_Windows.size(); i++)
+				// Iterate over windows backwards for two reasons.
+				// 1) If the first window should be closed, which also means all other windows should be closed,
+				//		then close the other windows first.
+				// 2) Swapping all other windows before the first one takes the time that the first window
+				//		would spend waiting for vsync, i.e. faster.
+				for (size_t i = m_Windows.size(); i; )
 				{
-					auto& rWindow = m_Windows[i];
-					if (rWindow->ShouldClose())
+					auto& rWindow = m_Windows[--i];
+					rWindow->GetContext()->SwapBuffers();
+					if (firstWindow.ShouldClose() || rWindow->ShouldClose())
 					{
 						rWindow.reset(); // Delete the window.
 						m_Windows.erase(m_Windows.begin() + i);
