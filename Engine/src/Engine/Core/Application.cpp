@@ -1,5 +1,6 @@
 #include "Engine/pch.h"
 #include "Engine/Core/Application.h"
+#include "Engine/Rendering/Renderer.h"
 
 extern bool g_RestartApplication;
 extern eng::RendererAPI::API g_NextRendererAPI;
@@ -16,6 +17,7 @@ namespace eng
 		s_pApplication = this;
 
 		m_Input = Input::CreateScope(BIND_FUNC(OnEvent));
+		//Renderer::Init(); // Delay renderer initialization until after first window creation.
 	}
 
 	Application::~Application()
@@ -50,7 +52,14 @@ namespace eng
 
 	Window& Application::OpenWindow(const WindowSpecifications& crWindowSpecs)
 	{
-		return *m_Windows.emplace_back(m_Windows.empty() ? Window::CreateScope(crWindowSpecs, nullptr) : Window::CreateScope(crWindowSpecs, m_Windows.front()));
+		if (m_Windows.empty())
+		{
+			Window& rWindow = *m_Windows.emplace_back(Window::CreateScope(crWindowSpecs, nullptr));
+			Renderer::Init();
+			return rWindow;
+		}
+
+		return *m_Windows.emplace_back(Window::CreateScope(crWindowSpecs, m_Windows.front()));
 	}
 
 	Window& Application::GetWindow(size_t index)
@@ -103,10 +112,14 @@ namespace eng
 			// 2) Swapping all other windows before the first one takes the time that the first window
 			//		would spend waiting for vsync, i.e. it's faster.
 			Window& rFirstWindow = *m_Windows.front();
+
+			if (rFirstWindow.ShouldClose())
+				Renderer::Shutdown();
+
 			for (size_t i = m_Windows.size(); i; )
 			{
 				auto& rWindow = *m_Windows[--i];
-				rWindow.GetContext()->SwapBuffers();
+				rWindow.GetContext().SwapBuffers();
 				if (rFirstWindow.ShouldClose() || rWindow.ShouldClose())
 					m_Windows.erase(m_Windows.begin() + i);
 			}

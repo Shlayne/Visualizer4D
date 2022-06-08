@@ -63,7 +63,8 @@ namespace eng
 		virtual void SetMouseCapture(bool mouseCaptured) = 0;
 		virtual void ToggleMouseCapture() = 0;
 	public:
-		virtual const Scope<Context>& GetContext() const = 0;
+		virtual Context& GetContext() = 0;
+		virtual const Context& GetContext() const = 0;
 		virtual void* GetNativeWindow() = 0;
 		virtual const void* GetNativeWindow() const = 0;
 	public:

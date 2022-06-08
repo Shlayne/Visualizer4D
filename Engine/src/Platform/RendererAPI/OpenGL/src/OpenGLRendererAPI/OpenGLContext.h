@@ -18,10 +18,7 @@ namespace eng
 		OpenGLContext(void* pNativeWindow);
 	public:
 		virtual void SwapBuffers() override;
-	public:
-		virtual const char* GetVendor() const override;
-		virtual const char* GetRenderer() const override;
-		virtual const char* GetVersion() const override;
+		virtual void MakeCurrent() override;
 	private:
 #if SYSTEM_WINDOWS
 		GLFWwindow* m_pWindow;

@@ -47,9 +47,10 @@ namespace eng
 		virtual void SetMouseCapture(bool mouseCaptured) override;
 		inline virtual void ToggleMouseCapture() override { SetMouseCapture(!IsMouseCaptured()); }
 	public:
+		inline virtual Context& GetContext() override { return *m_rContext; }
+		inline virtual const Context& GetContext() const override { return *m_rContext; }
 		inline virtual void* GetNativeWindow() override { return m_pWindow; }
 		inline virtual const void* GetNativeWindow() const override { return m_pWindow; }
-		inline virtual const Scope<Context>& GetContext() const override { return m_rContext; }
 	public:
 		virtual bool ShouldClose() const override;
 		inline virtual void Close() override { m_ShouldClose = true; }

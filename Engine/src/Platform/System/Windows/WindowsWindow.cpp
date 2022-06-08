@@ -6,13 +6,6 @@
 #include "Engine/Rendering/RendererAPI.h"
 #include "Platform/System/Windows/WindowsConversions.h"
 
-// These can only be used once per function, in this order.
-#define PUSH_CONTEXT(window) \
-		GLFWwindow* prevContext = glfwGetCurrentContext(); \
-		glfwMakeContextCurrent(window)
-#define POP_CONTEXT() \
-		glfwMakeContextCurrent(prevContext)
-
 namespace eng
 {
 	WindowsWindow::WindowsWindow(const WindowSpecifications& crSpecs, const Scope<Window>& crShareContextWindow)
@@ -29,10 +22,15 @@ namespace eng
 		glfwWindowHint(GLFW_RESIZABLE, m_State.resizable);
 		glfwWindowHint(GLFW_FOCUS_ON_SHOW, m_State.focused);
 		glfwWindowHint(GLFW_VISIBLE, false);
-		glfwWindowHint(GLFW_DOUBLEBUFFER, true);
 #if CONFIG_DEBUG
 		if (RendererAPI::GetAPI() == RendererAPI::API::OpenGL)
 			glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+#endif
+
+		GLFWwindow* pPreviousContext = glfwGetCurrentContext();
+#if ENABLE_LOGGING
+		if (pPreviousContext)
+			LOG_CORE_WARN("Window created on thread with rendering context already current.");
 #endif
 
 		{
@@ -65,8 +63,10 @@ namespace eng
 			PROFILE_SCOPE("Context::CreateScope");
 			m_rContext = Context::CreateScope(m_pWindow);
 		}
-		SetVsync(crSpecs.vsync);
-		SetMouseCapture(crSpecs.mouseCaptured);
+		if (crSpecs.vsync)
+			SetVsync(true);
+		if (crSpecs.mouseCaptured)
+			SetMouseCapture(true);
 
 		if (crSpecs.maximizeOnShow)
 		{
@@ -80,6 +80,9 @@ namespace eng
 
 		if (crSpecs.fullscreenOnShow)
 			SetFullscreen(true);
+
+		// Remake the caller thread's context current.
+		glfwMakeContextCurrent(pPreviousContext);
 
 		SetCallbacks(m_pWindow);
 		glfwShowWindow(m_pWindow);
@@ -102,10 +105,11 @@ namespace eng
 	{
 		if (!m_HasSharedContext)
 		{
-			PUSH_CONTEXT(m_pWindow);
-			glfwSwapInterval(!!vsync);
+			WithContext(m_pWindow, [vsync]()
+			{
+				glfwSwapInterval(!!vsync);
+			});
 			m_State.vsync = vsync;
-			POP_CONTEXT();
 		}
 	}
 
@@ -176,7 +180,7 @@ namespace eng
 		);
 
 		glfwGetFramebufferSize(m_pWindow, &m_State.current.framebufferSize.x, &m_State.current.framebufferSize.y);
-		SetVsync(IsVsyncEnabled());
+		SetVsync(IsVsyncEnabled()); // TODO: remove
 
 		m_State.fullscreen = fullscreen;
 	}
@@ -219,21 +223,15 @@ namespace eng
 
 	void WindowsWindow::WindowCloseCallback(GLFWwindow* pWindow)
 	{
-		PUSH_CONTEXT(pWindow);
-
 		if (State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow)))
 		{
 			WindowCloseEvent event(pWindow);
 			OnEvent(event);
 		}
-
-		POP_CONTEXT();
 	}
 
 	void WindowsWindow::WindowSizeCallback(GLFWwindow* pWindow, sint32 width, sint32 height)
 	{
-		PUSH_CONTEXT(pWindow);
-
 		if (State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow)))
 		{
 			State& state = *pState;
@@ -242,14 +240,10 @@ namespace eng
 			WindowResizeEvent event(pWindow, width, height);
 			OnEvent(event);
 		}
-
-		POP_CONTEXT();
 	}
 
 	void WindowsWindow::WindowPosCallback(GLFWwindow* pWindow, sint32 x, sint32 y)
 	{
-		PUSH_CONTEXT(pWindow);
-
 		if (State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow)))
 		{
 			State& state = *pState;
@@ -258,14 +252,10 @@ namespace eng
 			WindowMoveEvent event(pWindow, x, y);
 			OnEvent(event);
 		}
-
-		POP_CONTEXT();
 	}
 
 	void WindowsWindow::WindowFocusCallback(GLFWwindow* pWindow, sint32 focused)
 	{
-		PUSH_CONTEXT(pWindow);
-
 		if (State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow)))
 		{
 			State& state = *pState;
@@ -274,14 +264,10 @@ namespace eng
 			WindowFocusEvent event(pWindow, state.focused);
 			OnEvent(event);
 		}
-
-		POP_CONTEXT();
 	}
 
 	void WindowsWindow::WindowIconifyCallback(GLFWwindow* pWindow, sint32 iconified)
 	{
-		PUSH_CONTEXT(pWindow);
-
 		if (State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow)))
 		{
 			State& state = *pState;
@@ -290,14 +276,10 @@ namespace eng
 			WindowMinimizeEvent event(pWindow, state.minimized);
 			OnEvent(event);
 		}
-
-		POP_CONTEXT();
 	}
 
 	void WindowsWindow::WindowMaximizeCallback(GLFWwindow* pWindow, sint32 maximized)
 	{
-		PUSH_CONTEXT(pWindow);
-
 		if (State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow)))
 		{
 			State& state = *pState;
@@ -306,27 +288,19 @@ namespace eng
 			WindowMaximizeEvent event(pWindow, state.maximized);
 			OnEvent(event);
 		}
-
-		POP_CONTEXT();
 	}
 
 	void WindowsWindow::DropCallback(GLFWwindow* pWindow, sint32 count, const char** ppPaths)
 	{
-		PUSH_CONTEXT(pWindow);
-
 		if (State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow)))
 		{
 			WindowPathDropEvent event(pWindow, count, ppPaths);
 			OnEvent(event);
 		}
-
-		POP_CONTEXT();
 	}
 
 	void WindowsWindow::FramebufferSizeCallback(GLFWwindow* pWindow, sint32 width, sint32 height)
 	{
-		PUSH_CONTEXT(pWindow);
-
 		if (State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow)))
 		{
 			State& state = *pState;
@@ -335,40 +309,28 @@ namespace eng
 			WindowFramebufferResizeEvent event(pWindow, width, height);
 			OnEvent(event);
 		}
-
-		POP_CONTEXT();
 	}
 
 	void WindowsWindow::WindowContentScaleCallback(GLFWwindow* pWindow, float scaleX, float scaleY)
 	{
-		PUSH_CONTEXT(pWindow);
-
 		if (State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow)))
 		{
 			WindowContentScaleEvent event(pWindow, scaleX, scaleY);
 			OnEvent(event);
 		}
-
-		POP_CONTEXT();
 	}
 
 	void WindowsWindow::WindowRefreshCallback(GLFWwindow* pWindow)
 	{
-		PUSH_CONTEXT(pWindow);
-
 		if (State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow)))
 		{
 			WindowRefreshEvent event(pWindow);
 			OnEvent(event);
 		}
-
-		POP_CONTEXT();
 	}
 
 	void WindowsWindow::KeyCallback(GLFWwindow* pWindow, sint32 keycode, sint32 scancode, sint32 action, sint32 modifiers)
 	{
-		PUSH_CONTEXT(pWindow);
-
 		State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow));
 		if (pState != nullptr && keycode != GLFW_KEY_UNKNOWN)
 		{
@@ -394,27 +356,19 @@ namespace eng
 				}
 			}
 		}
-
-		POP_CONTEXT();
 	}
 
 	void WindowsWindow::CharCallback(GLFWwindow* pWindow, uint32 codepoint)
 	{
-		PUSH_CONTEXT(pWindow);
-
 		if (State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow)))
 		{
 			CharTypeEvent event(pWindow, codepoint);
 			OnEvent(event);
 		}
-
-		POP_CONTEXT();
 	}
 
 	void WindowsWindow::MouseButtonCallback(GLFWwindow* pWindow, sint32 button, sint32 action, sint32 modifiers)
 	{
-		PUSH_CONTEXT(pWindow);
-
 		State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow));
 		if (pState != nullptr)
 		{
@@ -434,40 +388,28 @@ namespace eng
 				}
 			}
 		}
-
-		POP_CONTEXT();
 	}
 
 	void WindowsWindow::CursorPosCallback(GLFWwindow* pWindow, double x, double y)
 	{
-		PUSH_CONTEXT(pWindow);
-
 		if (State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow)))
 		{
 			MouseMoveEvent event(pWindow, static_cast<float>(x), static_cast<float>(y));
 			OnEvent(event);
 		}
-
-		POP_CONTEXT();
 	}
 
 	void WindowsWindow::ScrollCallback(GLFWwindow* pWindow, double offsetX, double offsetY)
 	{
-		PUSH_CONTEXT(pWindow);
-
 		if (State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow)))
 		{
 			MouseScrollEvent event(pWindow, static_cast<float>(offsetX), static_cast<float>(offsetY));
 			OnEvent(event);
 		}
-
-		POP_CONTEXT();
 	}
 
 	void WindowsWindow::CursorEnterCallback(GLFWwindow* pWindow, sint32 entered)
 	{
-		PUSH_CONTEXT(pWindow);
-
 		if (State* pState = static_cast<State*>(glfwGetWindowUserPointer(pWindow)))
 		{
 			State& state = *pState;
@@ -476,7 +418,5 @@ namespace eng
 			MouseEnterEvent event(pWindow, state.mouseContained);
 			OnEvent(event);
 		}
-
-		POP_CONTEXT();
 	}
 }

@@ -21,18 +21,10 @@ namespace eng
 #endif
 	}
 
-	const char* OpenGLContext::GetVendor() const
+	void OpenGLContext::MakeCurrent()
 	{
-		return (const char*)glGetString(GL_VENDOR);
-	}
-
-	const char* OpenGLContext::GetRenderer() const
-	{
-		return (const char*)glGetString(GL_RENDERER);
-	}
-
-	const char* OpenGLContext::GetVersion() const
-	{
-		return (const char*)glGetString(GL_VERSION);
+#if SYSTEM_WINDOWS
+		Bind::glfwMakeContextCurrent(m_pWindow);
+#endif
 	}
 }

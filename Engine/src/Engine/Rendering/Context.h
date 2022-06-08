@@ -14,9 +14,9 @@ namespace eng
 		virtual ~Context() = default;
 	public:
 		virtual void SwapBuffers() = 0;
-	public:
-		virtual const char* GetVendor() const = 0;
-		virtual const char* GetRenderer() const = 0;
-		virtual const char* GetVersion() const = 0;
+		virtual void MakeCurrent() = 0;
 	};
+
+	void WithContext(void* pNativeWindow, const std::function<void()>& crfWork);
+	void RemoveCurrentContext();
 }
