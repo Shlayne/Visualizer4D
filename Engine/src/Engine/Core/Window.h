@@ -17,9 +17,10 @@ namespace eng
 		bool vsync : 1 = true;
 		bool resizable : 1 = true;
 		bool mouseCaptured : 1 = false;
+		bool decorated : 1 = true;
 
 		bool fullscreenOnShow : 1 = false;
-		bool focusOnShow : 1 = false;
+		bool focusOnShow : 1 = true;
 		bool maximizeOnShow : 1 = false;
 	};
 
@@ -54,6 +55,10 @@ namespace eng
 		virtual bool IsResizable() const = 0;
 		virtual void SetResizable(bool resizable) = 0;
 		virtual void ToggleResizable() = 0;
+
+		virtual bool IsDecorated() const = 0;
+		virtual void SetDecorated(bool decorated) = 0;
+		virtual void ToggleDecorated() = 0;
 
 		virtual bool IsFullscreen() const = 0;
 		virtual void SetFullscreen(bool fullscreen) = 0;

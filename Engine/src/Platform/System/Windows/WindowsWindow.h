@@ -39,6 +39,10 @@ namespace eng
 		virtual void SetResizable(bool resizable) override;
 		inline virtual void ToggleResizable() override { SetResizable(!IsResizable()); }
 
+		inline virtual bool IsDecorated() const override { return m_State.decorated; }
+		virtual void SetDecorated(bool decorated) override;
+		inline virtual void ToggleDecorated() override { SetDecorated(!IsDecorated()); }
+
 		inline virtual bool IsFullscreen() const override { return m_State.fullscreen; }
 		virtual void SetFullscreen(bool fullscreen) override;
 		inline virtual void ToggleFullscreen() override { SetFullscreen(!IsFullscreen()); }
@@ -64,16 +68,17 @@ namespace eng
 				glm::s32vec2 framebufferSize{ 0 };
 			} current, preFullscreen;
 
+			std::string title;
+
 			bool vsync : 1 = false;
 			bool resizable : 1 = false;
+			bool decorated : 1 = false;
 			bool fullscreen : 1 = false;
 			bool mouseCaptured : 1 = false;
 			bool mouseContained : 1 = false;
 			bool focused : 1 = false;
 			bool minimized : 1 = false;
 			bool maximized : 1 = false;
-
-			std::string title;
 		};
 	private:
 		GLFWwindow* m_pWindow = NULL;

@@ -15,11 +15,13 @@ namespace eng
 		m_State.current.size = { crSpecs.width, crSpecs.height };
 		m_State.title = crSpecs.title;
 		m_State.resizable = crSpecs.resizable;
+		m_State.decorated = crSpecs.decorated;
 		m_State.focused = crSpecs.focusOnShow;
 
 		m_HasSharedContext = static_cast<bool>(crShareContextWindow);
 
 		glfwWindowHint(GLFW_RESIZABLE, m_State.resizable);
+		glfwWindowHint(GLFW_DECORATED, m_State.decorated);
 		glfwWindowHint(GLFW_FOCUS_ON_SHOW, m_State.focused);
 		glfwWindowHint(GLFW_VISIBLE, false);
 #if CONFIG_DEBUG
@@ -117,6 +119,12 @@ namespace eng
 	{
 		glfwSetWindowAttrib(m_pWindow, GLFW_RESIZABLE, resizable);
 		m_State.resizable = resizable;
+	}
+
+	void WindowsWindow::SetDecorated(bool decorated)
+	{
+		glfwSetWindowAttrib(m_pWindow, GLFW_DECORATED, decorated);
+		m_State.decorated = decorated;
 	}
 
 	void WindowsWindow::SetFullscreen(bool fullscreen)

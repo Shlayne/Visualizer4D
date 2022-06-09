@@ -106,16 +106,15 @@ namespace eng
 
 			//Update(timestep);
 
+			Window& rFirstWindow = *m_Windows.front();
+			if (rFirstWindow.ShouldClose())
+				Renderer::Shutdown();
+
 			// Iterate over windows backwards for two reasons.
 			// 1) If the first window should be closed, which also means all other windows should be closed,
 			//		then close the other windows first.
 			// 2) Swapping all other windows before the first one takes the time that the first window
 			//		would spend waiting for vsync, i.e. it's faster.
-			Window& rFirstWindow = *m_Windows.front();
-
-			if (rFirstWindow.ShouldClose())
-				Renderer::Shutdown();
-
 			for (size_t i = m_Windows.size(); i; )
 			{
 				auto& rWindow = *m_Windows[--i];
