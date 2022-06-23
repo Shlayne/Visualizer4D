@@ -1,9 +1,6 @@
 #include "Engine/pch.h"
 #include "Engine/Rendering/RendererAPI.h"
-#if SYSTEM_SUPPORTS_OPENGL
-	#include "OpenGLRendererAPI/OpenGLRendererAPIBind.h"
-#endif
-#if SYSTEM_SUPPORTS_VULKAN
+#if SUPPORTS_VULKAN
 	#include "VulkanRendererAPI/VulkanRendererAPIBind.h"
 #endif
 #include <libloaderapi.h>
@@ -14,37 +11,25 @@ namespace eng
 
 	void RendererAPI::LoadAPI()
 	{
-		CORE_ASSERT(s_hLibModule == NULL, "Attempted to reload Renderer API without restarting!");
+		CORE_ASSERT(s_hLibModule == NULL, "Attempted to load Renderer API ({0}) without restarting!", RendererAPI::GetAPI());
 
 		switch (RendererAPI::GetAPI())
 		{
-#if SYSTEM_SUPPORTS_OPENGL
-		case API::OpenGL:
-			s_hLibModule = LoadLibraryW(L"OpenGLRendererAPI.dll");
-			CORE_ASSERT(s_hLibModule != NULL, "Failed to load OpenGL Renderer API dll!");
-
-#if ENABLE_LOGGING
-			OpenGLRendererAPIBind::SetLoggerFunctions
-			(
-				&Logger::GetCoreLogger
-			);
-#endif
-//#if SYSTEM_WINDOWS // Not necessary, as this is already windows only.
-			OpenGLRendererAPIBind::SetGLFWFunctions
-			(
-				&glfwMakeContextCurrent,
-				&glfwGetProcAddress,
-				&glfwSwapBuffers
-			);
-//#endif
-			break;
-#endif
-#if SYSTEM_SUPPORTS_VULKAN
-		case API::Vulkan:
+#if SUPPORTS_VULKAN
+		case API_Vulkan:
 			s_hLibModule = LoadLibraryW(L"VulkanRendererAPI.dll");
 			CORE_ASSERT(s_hLibModule != NULL, "Failed to load Vulkan Renderer API dll!");
 
-			// TODO: VulkanRendererAPIBind Functions.
+			VulkanRendererAPIBind::SetFunctions(
+#if ENABLE_LOGGING
+				&Logger::GetCoreLogger,
+#endif
+#if SYSTEM_WINDOWS
+				&glfwMakeContextCurrent,
+				&glfwGetProcAddress,
+				&glfwSwapBuffers
+#endif
+			);
 
 			break;
 #endif

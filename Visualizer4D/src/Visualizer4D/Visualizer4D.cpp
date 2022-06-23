@@ -11,7 +11,7 @@ namespace eng
 		windowSpecs.width = 1600;
 		windowSpecs.height = 900;
 		windowSpecs.title = "Visualizer 4D";
-		pApplication->OpenWindow(windowSpecs);
+		UNUSED(pApplication->OpenWindow(windowSpecs));
 
 		return pApplication;
 	}

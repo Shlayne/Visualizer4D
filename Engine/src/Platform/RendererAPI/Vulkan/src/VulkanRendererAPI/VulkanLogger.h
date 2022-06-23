@@ -1,6 +1,8 @@
 #pragma once
 
-// This should always be included immediately after OpenGLRendererAPIBind.h.
+#if ENABLE_ASSERTS
+	#undef ASSERT
+#endif
 
 // Client logging functions are not used, as this is never client code.
 #undef LOG_TRACE
@@ -9,8 +11,6 @@
 #undef LOG_WARN
 #undef LOG_ERROR
 #undef LOG_FATAL
-
-#undef ASSERT
 
 #if ENABLE_LOGGING
 	#undef LOG_CORE_TRACE

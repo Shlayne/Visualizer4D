@@ -19,14 +19,13 @@ project "Engine"
 	}
 
 	includedirs {
+		-- Add any project source directories here.
 		"src",
 
-		-- Add any header and source dependency includes here.
-		"%{IncludeDir.stb}",
-
-		-- Add any header-only dependency includes here.
+		-- Add any dependency includes here.
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.spdlog}"
+		"%{IncludeDir.spdlog}",
+		"%{IncludeDir.stb}",
 	}
 
 	-- Add any links dependency libs via their project names here.
@@ -42,25 +41,22 @@ project "Engine"
 		
 		defines {
 			"SYSTEM_WINDOWS",
-			"SYSTEM_SUPPORTS_OPENGL",
-			--"SYSTEM_SUPPORTS_VULKAN", -- This will be disabled until I implement it.
+
+			"SUPPORTS_VULKAN",
 		}
 
 		includedirs {
-			"%{IncludeDir.glad}",
 			"%{IncludeDir.glfw}",
 
-			"src/Platform/RendererAPI/OpenGL/src",
-			--"src/Platform/RendererAPI/Vulkan/src",
+			"src/Platform/RendererAPI/Vulkan/src",
 		}
 
 		links {
 			"glfw",
 
-			-- The static libs have to always be linked on their supported platforms,
+			-- Renderer APIs' static libs always have to be linked on their supported platforms
 			-- because they are static libs and have to be. Their dll counterparts don't.
-			"OpenGLRendererAPI",
-			--"VulkanRendererAPI",
+			"VulkanRendererAPI",
 		}
 
 		files {

@@ -10,7 +10,7 @@ namespace eng
 	WindowsInput::WindowsInput(eng::EventCallback&& rrfEventCallback)
 		: m_fEventCallback(std::move(rrfEventCallback))
 	{
-		PROFILE_SCOPE("glfwInit");
+		PROFILE_FUNCTION();
 
 #if ENABLE_ASSERTS
 		UNUSED(glfwSetErrorCallback([](int errorCode, const char* pDescription)
@@ -24,14 +24,14 @@ namespace eng
 		CORE_ASSERT(status == GLFW_TRUE, "Failed to initialize GLFW!");
 
 		UNUSED(glfwSetJoystickCallback([](sint32 jid, sint32 event)
+		{
+			WindowsInput& rInput = *static_cast<WindowsInput*>(&Get());
+			switch (event)
 			{
-				WindowsInput& rInput = *static_cast<WindowsInput*>(&Get());
-				switch (event)
-				{
 				case GLFW_CONNECTED: rInput.OnJoystickConnected(ConvertJoystickID(jid)); break;
 				case GLFW_DISCONNECTED: rInput.OnJoystickDisconnected(ConvertJoystickID(jid)); break;
-				}
-			}));
+			}
+		}));
 
 		// Now that the joystick callback is set, emit some fake connect events
 		// for joysticks that were connected prior to running the application.
@@ -74,13 +74,18 @@ namespace eng
 		return glm::vec2(glm::dvec2(windowPos) + cursorPos);
 	}
 
-	glm::vec2 WindowsInput::GetRelativeMousePosition(void* pNativeWindow) const
+	glm::vec2 WindowsInput::GetRelativeMousePosition(const void* pNativeWindow) const
 	{
-		GLFWwindow* pWindow = static_cast<GLFWwindow*>(pNativeWindow);
+		GLFWwindow* pWindow = const_cast<GLFWwindow*>(static_cast<const GLFWwindow*>(pNativeWindow));
 		CORE_ASSERT(pWindow != NULL, "Window was null!");
 		glm::dvec2 cursorPos{ 0.0 };
 		glfwGetCursorPos(pWindow, &cursorPos.x, &cursorPos.y);
 		return glm::vec2(cursorPos);
+	}
+
+	glm::vec2 WindowsInput::GetRelativeMousePosition(const Window& crWindow) const
+	{
+		return GetRelativeMousePosition(crWindow.GetNativeWindow());
 	}
 
 	bool WindowsInput::IsJoystickConnected(Joystick joystick) const

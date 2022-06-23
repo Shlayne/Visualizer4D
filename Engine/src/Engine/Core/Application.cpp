@@ -17,17 +17,16 @@ namespace eng
 		s_pApplication = this;
 
 		m_Input = Input::CreateScope(BIND_FUNC(OnEvent));
-		//Renderer::Init(); // Delay renderer initialization until after first window creation.
 	}
 
 	Application::~Application()
 	{
 		CORE_ASSERT(s_pApplication != nullptr, "Attempted to redestroy Application!");
+		s_pApplication = nullptr;
 
+		Renderer::Shutdown();
 		m_Windows.clear();
 		DestroyScope(m_Input);
-
-		s_pApplication = nullptr;
 	}
 
 	Application& Application::Get()
@@ -52,14 +51,7 @@ namespace eng
 
 	Window& Application::OpenWindow(const WindowSpecifications& crWindowSpecs)
 	{
-		if (m_Windows.empty())
-		{
-			Window& rWindow = *m_Windows.emplace_back(Window::CreateScope(crWindowSpecs, nullptr));
-			Renderer::Init();
-			return rWindow;
-		}
-
-		return *m_Windows.emplace_back(Window::CreateScope(crWindowSpecs, m_Windows.front()));
+		return *m_Windows.emplace_back(Window::CreateScope(crWindowSpecs));
 	}
 
 	Window& Application::GetWindow(size_t index)
@@ -98,11 +90,13 @@ namespace eng
 		CORE_ASSERT(!m_Windows.empty(), "Application must have at least one window to run!");
 		m_Running = true;
 
-		Input& input = *m_Input;
+		Renderer::Init();
+
+		Input& rInput = *m_Input;
 		while (m_Running)
 		{
-			Timestep timestep = input.GetElapsedTime();
-			input.PollEvents();
+			Timestep timestep = rInput.GetElapsedTime();
+			rInput.PollEvents();
 
 			//Update(timestep);
 
@@ -118,7 +112,7 @@ namespace eng
 			for (size_t i = m_Windows.size(); i; )
 			{
 				auto& rWindow = *m_Windows[--i];
-				rWindow.GetContext().SwapBuffers();
+				//rWindow.GetContext().SwapBuffers(); // TODO: Vulkan swap chain takes care of this.
 				if (rFirstWindow.ShouldClose() || rWindow.ShouldClose())
 					m_Windows.erase(m_Windows.begin() + i);
 			}

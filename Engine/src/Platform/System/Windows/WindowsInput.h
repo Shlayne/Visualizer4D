@@ -17,7 +17,8 @@ namespace eng
 		virtual bool IsMouseButtonPressed(MouseButton button) const override;
 
 		virtual glm::vec2 GetAbsoluteMousePosition() const override;
-		virtual glm::vec2 GetRelativeMousePosition(void* pNativeWindow) const override;
+		virtual glm::vec2 GetRelativeMousePosition(const void* cpNativeWindow) const override;
+		virtual glm::vec2 GetRelativeMousePosition(const Window& crWindow) const override;
 
 		virtual bool IsJoystickConnected(Joystick joystick) const override;
 		virtual bool IsJoystickButtonPressed(Joystick joystick, JoystickButton button) const override;

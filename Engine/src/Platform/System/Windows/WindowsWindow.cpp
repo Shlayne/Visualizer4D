@@ -3,12 +3,11 @@
 #include "Engine/Events/WindowEvents.h"
 #include "Engine/Events/KeyEvents.h"
 #include "Engine/Events/MouseEvents.h"
-#include "Engine/Rendering/RendererAPI.h"
 #include "Platform/System/Windows/WindowsConversions.h"
 
 namespace eng
 {
-	WindowsWindow::WindowsWindow(const WindowSpecifications& crSpecs, const Scope<Window>& crShareContextWindow)
+	WindowsWindow::WindowsWindow(const WindowSpecifications& crSpecs)
 	{
 		PROFILE_FUNCTION();
 
@@ -18,30 +17,15 @@ namespace eng
 		m_State.decorated = crSpecs.decorated;
 		m_State.focused = crSpecs.focusOnShow;
 
-		m_HasSharedContext = static_cast<bool>(crShareContextWindow);
-
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_RESIZABLE, m_State.resizable);
 		glfwWindowHint(GLFW_DECORATED, m_State.decorated);
 		glfwWindowHint(GLFW_FOCUS_ON_SHOW, m_State.focused);
 		glfwWindowHint(GLFW_VISIBLE, false);
-#if CONFIG_DEBUG
-		if (RendererAPI::GetAPI() == RendererAPI::API::OpenGL)
-			glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-#endif
-
-		GLFWwindow* pPreviousContext = glfwGetCurrentContext();
-#if ENABLE_LOGGING
-		if (pPreviousContext)
-			LOG_CORE_WARN("Window created on thread with rendering context already current.");
-#endif
 
 		{
 			PROFILE_SCOPE("glfwCreateWindow");
-			m_pWindow = glfwCreateWindow(
-				m_State.current.size.x, m_State.current.size.y,
-				m_State.title.c_str(),
-				NULL, m_HasSharedContext ? (static_cast<WindowsWindow*>(crShareContextWindow.get()))->m_pWindow : NULL
-			);
+			m_pWindow = glfwCreateWindow(m_State.current.size.x, m_State.current.size.y, m_State.title.c_str(), NULL, NULL);
 		}
 		CORE_ASSERT(m_pWindow != NULL, "Failed to create window!");
 
@@ -61,10 +45,6 @@ namespace eng
 		glfwSetInputMode(m_pWindow, GLFW_LOCK_KEY_MODS, true);
 		glfwSetWindowUserPointer(m_pWindow, &m_State);
 
-		{
-			PROFILE_SCOPE("Context::CreateScope");
-			m_rContext = Context::CreateScope(m_pWindow);
-		}
 		if (crSpecs.vsync)
 			SetVsync(true);
 		if (crSpecs.mouseCaptured)
@@ -82,9 +62,6 @@ namespace eng
 
 		if (crSpecs.fullscreenOnShow)
 			SetFullscreen(true);
-
-		// Remake the caller thread's context current.
-		glfwMakeContextCurrent(pPreviousContext);
 
 		SetCallbacks(m_pWindow);
 		glfwShowWindow(m_pWindow);
@@ -105,14 +82,9 @@ namespace eng
 
 	void WindowsWindow::SetVsync(bool vsync)
 	{
-		if (!m_HasSharedContext)
-		{
-			WithContext(m_pWindow, [vsync]()
-			{
-				glfwSwapInterval(!!vsync);
-			});
-			m_State.vsync = vsync;
-		}
+		// TODO: How do this with Vulkan?
+		//glfwSwapInterval(!!vsync);
+		//m_State.vsync = vsync;
 	}
 
 	void WindowsWindow::SetResizable(bool resizable)

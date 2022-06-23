@@ -4,6 +4,7 @@
 #include "Engine/Core/Keycodes.h"
 #include "Engine/Core/MouseButtons.h"
 #include "Engine/Core/Timestep.h"
+#include "Engine/Core/Window.h"
 #include "Engine/Events/Event.h"
 
 namespace eng
@@ -22,7 +23,9 @@ namespace eng
 		// Gets the position of the mouse relative to the top left corner of the primary monitor.
 		virtual glm::vec2 GetAbsoluteMousePosition() const = 0;
 		// Gets the position of the mouse relative to the top left of the given window's content area.
-		virtual glm::vec2 GetRelativeMousePosition(void* pNativeWindow) const = 0;
+		virtual glm::vec2 GetRelativeMousePosition(const void* cpNativeWindow) const = 0;
+		// Gets the position of the mouse relative to the top left of the given window's content area.
+		virtual glm::vec2 GetRelativeMousePosition(const Window& crWindow) const = 0;
 
 		// Returns true if the joystick is connected, false otherwise.
 		virtual bool IsJoystickConnected(Joystick joystick) const = 0;

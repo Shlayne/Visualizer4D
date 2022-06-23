@@ -18,17 +18,14 @@ project "Visualizer4D"
 	}
 
 	includedirs {
-		"src",
-
 		-- Add any project source directories here.
+		"src",
 		"%{wks.location}/Engine/src",
 
-		-- Add any header and source dependency includes here.
-		"%{IncludeDir.stb}",
-
-		-- Add any header-only dependency includes here.
+		-- Add any dependency includes here.
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.spdlog}"
+		"%{IncludeDir.spdlog}",
+		"%{IncludeDir.stb}",
 	}
 
 	-- Add any links dependency libs via their project names here.

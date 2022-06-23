@@ -48,56 +48,56 @@ namespace eng
 
 	void Renderer::Init()
 	{
-		CORE_ASSERT(!s_API, "Attempted to recreate renderer!");
+		//CORE_ASSERT(s_API == nullptr, "Attempted to recreate renderer!");
 
-		s_API = RendererAPI::CreateScope();
-		s_RenderThread = std::thread(&Renderer::RenderThread);
+		//s_API = RendererAPI::CreateScope();
+		//s_RenderThread = std::thread(&Renderer::RenderThread);
 	}
 
 	void Renderer::Shutdown()
 	{
-		// May be called without Init being called.
-		if (!s_API) return;
+		//// May be called without Init being called.
+		//if (s_API == nullptr) return;
 
-		s_CommandQueue.IssueCommand(RenderCommand_Shutdown, true);
-		s_RenderThread.join();
-		s_CommandQueue.ClearPendingCommands();
-		DestroyScope(s_API);
+		//s_CommandQueue.IssueCommand(RenderCommand_Shutdown, true);
+		//s_RenderThread.join();
+		//s_CommandQueue.ClearPendingCommands();
+		//DestroyScope(s_API);
 
-		// Reset cached values.
-		memset(&s_Cache, 0, sizeof(s_Cache));
+		//// Reset cached values.
+		//memset(&s_Cache, 0, sizeof(s_Cache));
 	}
 
 	void Renderer::RenderThread()
 	{
-		Application::Get().GetWindow().GetContext().MakeCurrent();
+		//Application::Get().GetWindow().GetContext().MakeCurrent();
 
-		RenderCommand command;
-		do
-		{
-			// Wait for a command to be issued.
-			command = s_CommandQueue.WaitForCommand();
-			// Execute the command.
-			s_LastReturn = s_CommandFunctions[command.GetType()](command.GetData());
-			// Delete the command's input data.
-			delete command.GetData();
+		//RenderCommand command;
+		//do
+		//{
+		//	// Wait for a command to be issued.
+		//	command = s_CommandQueue.WaitForCommand();
+		//	// Execute the command.
+		//	s_LastReturn = s_CommandFunctions[command.GetType()](command.GetData());
+		//	// Delete the command's input data.
+		//	delete command.GetData();
 
-			// If the command had a return value...
-			if (s_LastReturn)
-			{
-				// Let the caller know and wait until they receive it before it's deleted.
-				{
-					std::lock_guard<std::mutex> lock(s_ReturnMutex);
-					s_ReturnCondition.notify_one();
-				}
-				while (!s_ReturnAcquired); // Should be very fast, if not instant.
-				s_ReturnAcquired = false;
-				delete static_cast<void*>(s_LastReturn);
-			}
-		}
-		while (command.GetType() != RenderCommand_Shutdown);
+		//	// If the command had a return value...
+		//	if (s_LastReturn)
+		//	{
+		//		// Let the caller know and wait until they receive it before it's deleted.
+		//		{
+		//			std::lock_guard<std::mutex> lock(s_ReturnMutex);
+		//			s_ReturnCondition.notify_one();
+		//		}
+		//		while (!s_ReturnAcquired); // Should be very fast, if not instant.
+		//		s_ReturnAcquired = false;
+		//		delete static_cast<void*>(s_LastReturn);
+		//	}
+		//}
+		//while (command.GetType() != RenderCommand_Shutdown);
 
-		RemoveCurrentContext();
+		//RemoveCurrentContext();
 	}
 
 	void Renderer::EnableDepthTest() { s_CommandQueue.IssueCommand(RenderCommand_EnableDepthTest); }

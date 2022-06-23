@@ -7,7 +7,7 @@
 #include "Engine/Debug/Profiler.h"
 
 bool g_RestartApplication = true;
-eng::RendererAPI::API g_NextRendererAPI = eng::RendererAPI::API::None;
+eng::RendererAPI::API g_NextRendererAPI = eng::RendererAPI::API_None;
 
 namespace eng
 {
@@ -20,7 +20,7 @@ namespace eng
 #endif
 
 		// TODO: change this.
-		bool initialSettingRendererAPIStatus = RendererAPI::SetAPI(RendererAPI::API::OpenGL);
+		bool initialSettingRendererAPIStatus = RendererAPI::SetAPI(RendererAPI::API_Vulkan);
 		CORE_ASSERT(initialSettingRendererAPIStatus, "Failed to set initial Renderer API!");
 
 		do
@@ -41,9 +41,7 @@ namespace eng
 
 			if (!RendererAPI::SetAPI(g_NextRendererAPI))
 			{
-				LOG_CORE_WARN("Could not set Renderer API to {0}. Defaulting to old Renderer API {1}",
-					static_cast<uint8>(g_NextRendererAPI),
-					static_cast<uint8>(RendererAPI::GetAPI()));
+				LOG_CORE_WARN("Could not set Renderer API to {0}. Defaulting to old Renderer API {1}", g_NextRendererAPI, RendererAPI::GetAPI());
 				g_NextRendererAPI = RendererAPI::GetAPI();
 			}
 		}

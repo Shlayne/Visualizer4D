@@ -1,10 +1,11 @@
+VULKAN_SDK = os.getenv("VULKAN_SDK")
+
 IncludeDir = {}
 LibraryDir = {}
 Library = {}
 
 -- Include Directories
 	-- Header and Source; they have their own project.
-	IncludeDir["glad"] = "%{wks.location}/Engine/src/Platform/RendererAPI/OpenGL/Dependencies/glad-0.1.35/include"
 	IncludeDir["glfw"] = "%{wks.location}/Engine/Dependencies/glfw-3.3.7/include"
 	IncludeDir["stb"] = "%{wks.location}/Engine/Dependencies/stb-2.27/include"
 
@@ -13,10 +14,11 @@ Library = {}
 	IncludeDir["spdlog"] = "%{wks.location}/Engine/Dependencies/spdlog-1.10.0/include"
 
 	-- Header and Lib; they also don't have their own project.
-	--	IncludeDir["__LIBRARY_NAME__"] = "%{__LIBRARY_NAME__}/__LIBRARY_INCLUDE_PATH__"
+	IncludeDir["VulkanSDK"] = "%{VULKAN_SDK}/Include"
 
 -- Library Directories
-	--	LibraryDir["__LIBRARY_DIR_NAME__"] = "%{__LIBRARY_DIR_NAME__}/__LIBRARY_DIR_PATH__"
+	LibraryDir["VulkanSDK"] = "%{VULKAN_SDK}/Lib/"
+	LibraryDir["VulkanSDK_Debug"] = "%{VULKAN_SDK}/Debug/Lib/"
 
 -- Libraries
-	--	Library["__LIBRARY_NAME__"] = "%{LibraryDir.__LIBRARY_NAME__}/__LIBRARY_PATH__"
+	Library["VulkanSDK"] = "vulkan-1"

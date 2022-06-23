@@ -1,4 +1,4 @@
-project "OpenGLRendererAPI"
+project "VulkanRendererAPI"
 	filter "system:not windows"
 		kind "None"
 
@@ -13,12 +13,10 @@ project "OpenGLRendererAPI"
 		objdir ("%{wks.location}/bin-int/" .. OutputDir .. "/%{prj.name}")
 
 		postbuildcommands {
-			"xcopy \"%{wks.location}bin\\" .. OutputDir .. "\\OpenGLRendererAPI\\OpenGLRendererAPI.dll\" \"%{wks.location}bin\\" .. OutputDir .. "\\Visualizer4D\\\" /Y"
+			"xcopy \"%{wks.location}bin\\" .. OutputDir .. "\\VulkanRendererAPI\\VulkanRendererAPI.dll\" \"%{wks.location}bin\\" .. OutputDir .. "\\Visualizer4D\\\" /Y"
 		}
 
-		defines "OPENGL_RENDERER_API_EXPORT"
-	
-		links "glad"
+		defines "VULKAN_RENDERER_API_EXPORT"
 
 		files {
 			"src/**.h",
@@ -27,19 +25,19 @@ project "OpenGLRendererAPI"
 		}
 
 		includedirs {
-			"src",
-
 			-- Add any project source directories here.
+			"src",
 			"%{wks.location}/Engine/src",
 
-			-- Add any header and source dependency includes here.
-			"%{IncludeDir.glad}",
-			"%{IncludeDir.stb}",
-
-			-- Add any header-only dependency includes here.
+			-- Add any dependency includes here.
 			"%{IncludeDir.glm}",
-			"%{IncludeDir.spdlog}"
+			"%{IncludeDir.spdlog}",
+			"%{IncludeDir.stb}",
+			"%{IncludeDir.VulkanSDK}",
 		}
+
+		libdirs "%{LibraryDir.VulkanSDK}"
+		links "%{Library.VulkanSDK}"
 
 		filter "system:windows"
 			systemversion "latest"

@@ -53,7 +53,8 @@ namespace eng
 		virtual sint32 GetMaxFramebufferHeight() = 0;
 		virtual sint32 GetMaxFramebufferColorAttachments() = 0;
 	public:
-		enum class API : uint8 { None, OpenGL, Vulkan };
+		using API = uint8;
+		enum : API { API_None, API_Vulkan };
 		static API GetAPI();
 		static bool SupportsAPI(API api);
 	private:
@@ -72,5 +73,6 @@ namespace eng
 
 #define UNKNOWN_RENDERER_API(api, ...) \
 	default: \
-		CORE_ASSERT(false, "Unknown or unsupported Renderer API ({0})!", static_cast<uint8>(api)); \
-		return __VA_ARGS__ // Despite being va args, this is only for one return value.
+		CORE_ASSERT(false, "Unknown or unsupported Renderer API ({0})!", (api)); \
+		return __VA_ARGS__	// Despite being va args, this is only for one return value.
+							// It's for there being a return value or not.

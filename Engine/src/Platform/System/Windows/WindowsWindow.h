@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Engine/Core/Window.h"
-#include "Engine/Rendering/Context.h"
 #define GLFW_INCLUDE_NONE
 #include <glfw/glfw3.h>
 
@@ -10,7 +9,7 @@ namespace eng
 	class WindowsWindow : public Window
 	{
 	public:
-		WindowsWindow(const WindowSpecifications& crSpecs, const Scope<Window>& crShareContextWindow);
+		WindowsWindow(const WindowSpecifications& crSpecs);
 		virtual ~WindowsWindow();
 	public:
 		inline virtual sint32 GetWidth() const override { return m_State.current.size.x; }
@@ -51,8 +50,6 @@ namespace eng
 		virtual void SetMouseCapture(bool mouseCaptured) override;
 		inline virtual void ToggleMouseCapture() override { SetMouseCapture(!IsMouseCaptured()); }
 	public:
-		inline virtual Context& GetContext() override { return *m_rContext; }
-		inline virtual const Context& GetContext() const override { return *m_rContext; }
 		inline virtual void* GetNativeWindow() override { return m_pWindow; }
 		inline virtual const void* GetNativeWindow() const override { return m_pWindow; }
 	public:
@@ -82,10 +79,8 @@ namespace eng
 		};
 	private:
 		GLFWwindow* m_pWindow = NULL;
-		Scope<Context> m_rContext = nullptr;
 		State m_State;
 		bool m_ShouldClose : 1 = false;
-		bool m_HasSharedContext : 1 = false;
 	private:
 		static void SetCallbacks(GLFWwindow* pWindow);
 

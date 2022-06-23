@@ -6,15 +6,15 @@ namespace eng
 {
 	void RenderCommandQueue::IssueCommand(RenderCommand command, bool highPriority)
 	{
-		CORE_ASSERT(command.GetType() < RenderCommand_Count, "Attempted to issue invalid Render Command!");
+		//CORE_ASSERT(command.GetType() < RenderCommand_Count, "Attempted to issue invalid Render Command!");
 
-		std::lock_guard<std::mutex> lock(m_Mutex);
-		if (highPriority) // If the command is high priority, call it next.
-			m_Queue.push_front(command);
-		else // Otherwise, it will be called after other all commands in the queue.
-			m_Queue.push_back(command);
-		// Notify the render thread that a command has been issued.
-		m_Condition.notify_one();
+		//std::lock_guard<std::mutex> lock(m_Mutex);
+		//if (highPriority) // If the command is high priority, call it next.
+		//	m_Queue.push_front(command);
+		//else // Otherwise, it will be called after other all commands in the queue.
+		//	m_Queue.push_back(command);
+		//// Notify the render thread that a command has been issued.
+		//m_Condition.notify_one();
 	}
 
 	RenderCommand RenderCommandQueue::WaitForCommand()

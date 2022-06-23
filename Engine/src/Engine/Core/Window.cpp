@@ -7,10 +7,10 @@
 
 namespace eng
 {
-	Scope<Window> Window::CreateScope(const WindowSpecifications& crSpecs, const Scope<Window>& crShareContextWindow)
+	Scope<Window> Window::CreateScope(const WindowSpecifications& crSpecs)
 	{
 #if SYSTEM_WINDOWS
-		return eng::CreateScope<WindowsWindow>(crSpecs, crShareContextWindow);
+		return eng::CreateScope<WindowsWindow>(crSpecs);
 #endif
 	}
 

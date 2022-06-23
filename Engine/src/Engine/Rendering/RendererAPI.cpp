@@ -1,15 +1,12 @@
 #include "Engine/pch.h"
 #include "Engine/Rendering/RendererAPI.h"
-#if SYSTEM_SUPPORTS_OPENGL
-	#include "OpenGLRendererAPI/OpenGLRendererAPI.h"
-#endif
-#if SYSTEM_SUPPORTS_VULKAN
-	#include "VulkanRendererAPI/VulkanRendererAPI.h"
+#if SUPPORTS_VULKAN
+	//#include "VulkanRendererAPI/VulkanRendererAPI.h"
 #endif
 
 namespace eng
 {
-	static RendererAPI::API s_API = RendererAPI::API::None;
+	static RendererAPI::API s_API = RendererAPI::API_None;
 
 	RendererAPI::API RendererAPI::GetAPI()
 	{
@@ -28,11 +25,8 @@ namespace eng
 	{
 		switch (api)
 		{
-#if SYSTEM_SUPPORTS_OPENGL
-		case API::OpenGL: break;
-#endif
-#if SYSTEM_SUPPORTS_VULKAN
-		case API::Vulkan: break;
+#if SUPPORTS_VULKAN
+		case API_Vulkan: break;
 #endif
 		default: return false;
 		}
@@ -44,11 +38,8 @@ namespace eng
 	{
 		switch (s_API)
 		{
-#if SYSTEM_SUPPORTS_OPENGL
-		case API::OpenGL: return eng::CreateScope<OpenGLRendererAPI>();
-#endif
-#if SYSTEM_SUPPORTS_VULKAN
-		case API::Vulkan: return eng::CreateScope<VulkanRendererAPI>();
+#if SUPPORTS_VULKAN
+		case API_Vulkan: return nullptr; // TODO // eng::CreateScope<VulkanRendererAPI>();
 #endif
 		UNKNOWN_RENDERER_API(s_API, nullptr);
 		}
